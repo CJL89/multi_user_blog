@@ -12,18 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Dependecies for tha application
+import os
 import webapp2
+import jinja2
 
-form = """
-<form method="post">
-  <input name="q">
-  <input type="submit">
-</form>
-"""
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+                               autoescape = True)
+def render_str(template, **params):
+    t = jinja_env.get_template(template)
+    return t.render(params)
 
-class MainPage(webapp2.RequestHandler):
+
+class BaseHandler(webapp2.RequestHandler):
+    """
+    BaseHandler is method that inherits from webapp2.
+    Helper Methods are to define.
+    """
+    def write(self, *a, **kw):
+        """
+        Writes output to client browser
+        """
+        self.response.out.write(*a, **kw)
+        
+    def render_str(self, template, **params):
+        """
+        Render HTML Templates
+        """
+        return render_str(template, **params)
+
+    def render(self, template, **kw):
+        self.write(self.render_str(template, **kw))
+
+class MainPage(BaseHandler):
     def get(self):
-        self.response.write(form)
+        self.render('default.html')
 
 
 app = webapp2.WSGIApplication([('/', MainPage),], debug=True)
