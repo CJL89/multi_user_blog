@@ -1,0 +1,17 @@
+<div class="post col-md-12">
+  <div class="row">
+    <div class="col-md-4">
+      <h3 class = "post_heading">
+        <a href="#" class="post_title">{{p.subject}}</a>
+      </h3>
+    </div>
+    <div class="col-md-4">
+      <small class = "post-date">{{p.created.strftime("%b %d, %Y")}}</small>
+    </div>
+    <div class="col-md-4 post_content">
+      <p>
+        {{p._render_text | safe}}
+      </p>
+    </div>
+  </div>
+</div>
