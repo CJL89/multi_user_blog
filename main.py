@@ -59,11 +59,11 @@ def blog_key(name='default'):
 class MainPage(BaseHandler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc limit 10")
-        self.render('front.html', post= posts)
+        self.render('default.html', post= posts)
 
 
 # Post Function
-class Post(db.model):
+class Post(db.Model):
     """
     Attributes for the Post datastore
     """
@@ -118,5 +118,6 @@ class NewPostPage(BaseHandler):
             self.render("newpost.html", subject= subject, content = content, error = error)
 
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/blog/([0-9]+)', PostPage)
+                               ('/blog/([0-9]+)', PostPage),
+                               ('/blog/newpost', NewPostPage),
                               ], debug=True)
