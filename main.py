@@ -59,7 +59,8 @@ def blog_key(name='default'):
 class MainPage(BaseHandler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc limit 10")
-        self.render('default.html', post= posts)
+        self.render('default.html', posts= posts)
+
 
 
 # Post Function
@@ -112,12 +113,32 @@ class NewPostPage(BaseHandler):
         if subject and content:
             newpost = Post(parent = blog_key(), subject = subject, content = content)
             newpost.put()
-            self.redirect('/post/%s' %str(newpost.key().id()))
+            self.redirect('/blog/%s' %str(newpost.key().id()))
         else:
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
 
+class SignUpPage(BaseHandler):
+    """
+    Sign Up Page. Getting username, password, email,
+    and verification of password from user input.
+    """
+    def get(self):
+        self.render("signup.html")
+
+    def post(self):
+        post_error = False
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
+
+        params = dict(username=self.username, email = self.email)
+
+
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
+                               ('/signup', SignUpPage)
                               ], debug=True)
