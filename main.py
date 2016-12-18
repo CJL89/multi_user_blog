@@ -75,7 +75,7 @@ class Post(db.Model):
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
+        return render_str("front.html", p = self)
 
 
 class PostPage(BaseHandler):

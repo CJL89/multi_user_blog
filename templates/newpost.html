@@ -1,10 +1,9 @@
 {% extends "default.html" %}
 
 {% block content %}
-
 <div class="container">
   <div class="cold-md-12">
-    <h2>Welcome to the New Post</h2>
+    <h2>Post Form</h2>
   </div>
   <div class="col-md-12">
     <form method="post">
@@ -14,12 +13,16 @@
       </div>
       <div class="form-group">
         <label for="post_content">Content</label>
-        <textarea name="form" rows="8">{{content}}</textarea>
+      <div>
+        <textarea name="form">{{content}}</textarea>
+      </div>
 
-        <button type="submit" name="Submit"></button>
+
+        <input type="submit" name="Submit"></input>
       </div>
     </form>
 
   </div>
 </div><!-- container-->
+
 {% endblock %}
