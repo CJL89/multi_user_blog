@@ -111,11 +111,13 @@ class NewPostPage(BaseHandler):
 
     def post(self):
         subject = self.request.get('subject')
-        content = self.request.get('content')
+        content = self.request.get('post_text')
 
         if subject and content:
             p = Post(parent = blog_key(), subject = subject, content = content)
             p.put()
+            print p
+
             self.redirect('/blog/%s' %str(p.key().id()))
         else:
             error = "Please enter Subject and Content"
