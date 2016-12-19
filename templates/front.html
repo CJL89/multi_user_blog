@@ -1,20 +1,22 @@
-{% extends default.html%}
+{% extends "default.html" %}
 
 {% block content %}
 
-<div class="row">
-  <div class="col-md-12">
-    <h2>Hari's Multi User Blog Post For Udacity</h2>
-
     {% for p in posts %}
-       <div class="row">
-         {{ posts.render | safe }}
-       </div>
+
+         {{ p.render | safe }}
+
     {% endfor %}
-    
-  </div>
-</div>
+
 
 
 
 {% endblock %}
+
+<!-- <div class="row">
+  <div class="col-md-12">
+
+<div class="row">
+  </div>
+</div>
+</div> -->

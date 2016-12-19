@@ -6,3 +6,8 @@ body {
 .navbar-static-top {
   margin-bottom: 19px;
 }
+
+.content {
+  height: 100px;
+  weight: 400px;
+}

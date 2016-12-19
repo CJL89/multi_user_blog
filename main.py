@@ -59,7 +59,7 @@ def blog_key(name='default'):
 class MainPage(BaseHandler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc limit 10")
-        self.render('default.html', posts= posts)
+        self.render('front.html', posts= posts)
 
 
 
@@ -76,7 +76,7 @@ class Post(db.Model):
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
-        return render_str("front.html", p = self)
+        return render_str("post.html", p = self)
 
 
 class PostPage(BaseHandler):
@@ -87,9 +87,11 @@ class PostPage(BaseHandler):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
 
+
         if not post:
             self.error(404)
             return
+        self.render("permalink.html", post = post)
 
     def post(self, post_id):
         """
@@ -101,6 +103,7 @@ class PostPage(BaseHandler):
         if not post:
             self.error(404)
             return
+        self.render("post.html", posts = posts)
 
 class NewPostPage(BaseHandler):
     def get(self):
@@ -111,9 +114,9 @@ class NewPostPage(BaseHandler):
         content = self.request.get('content')
 
         if subject and content:
-            newpost = Post(parent = blog_key(), subject = subject, content = content)
-            newpost.put()
-            self.redirect('/blog/%s' %str(newpost.key().id()))
+            p = Post(parent = blog_key(), subject = subject, content = content)
+            p.put()
+            self.redirect('/blog/%s' %str(p.key().id()))
         else:
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
