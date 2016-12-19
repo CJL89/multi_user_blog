@@ -120,6 +120,7 @@ class NewPostPage(BaseHandler):
 
 class SignUpPage(BaseHandler):
     """
+    Still Working on this function.
     Sign Up Page. Getting username, password, email,
     and verification of password from user input.
     """
@@ -133,7 +134,7 @@ class SignUpPage(BaseHandler):
         verify = self.request.get('verify')
         email = self.request.get('email')
 
-        params = dict(username=self.username, email = self.email)
+
 
 
 
