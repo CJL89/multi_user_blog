@@ -1,13 +1,35 @@
 /*HTML ELEMENTS*/
 body {
-  min-height: 2000px;
+  padding-top: 50px;
 }
 
-.navbar-static-top {
-  margin-bottom: 19px;
+h2 {
+  color: #337ab7;
+}
+
+
+#337ab7
+.starter-template {
+  padding: 40px 15px;
+  text-align: left;
 }
 
 .content {
   height: 100px;
   weight: 400px;
+}
+
+/*Navbar*/
+.navbar{
+  background-color: #FFFFFF;
+  margin-top: 10px;
+  border: none;
+}
+.navbar-inverse .navbar-brand{
+  color: #337ab7;
+}
+
+.navbar-inverse .navbar-nav>.active>a {
+  color:#FFFFFF;
+  background-color: #337ab7;
 }
