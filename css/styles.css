@@ -7,6 +7,14 @@ h2 {
   color: #337ab7;
 }
 
+input {
+  width: 100%;
+}
+
+#userform {
+  width: 50%;
+}
+
 
 #337ab7
 .starter-template {

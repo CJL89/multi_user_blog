@@ -116,9 +116,8 @@ class NewPostPage(BaseHandler):
         if subject and content:
             p = Post(parent = blog_key(), subject = subject, content = content)
             p.put()
-            self.redirect('/%s' %str(p.key().id()))
-
-            #self.redirect('/blog/%s' %str(p.key().id()))
+            self.redirect('/')
+            self.redirect('/blog/%s' %str(p.key().id()))
         else:
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
@@ -138,6 +137,10 @@ class SignUpPage(BaseHandler):
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
+
+
+#User Model
+class User)(db.Model)
 
 
 
