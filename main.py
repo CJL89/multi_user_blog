@@ -116,9 +116,9 @@ class NewPostPage(BaseHandler):
         if subject and content:
             p = Post(parent = blog_key(), subject = subject, content = content)
             p.put()
-            print p
+            self.redirect('/%s' %str(p.key().id()))
 
-            self.redirect('/blog/%s' %str(p.key().id()))
+            #self.redirect('/blog/%s' %str(p.key().id()))
         else:
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
