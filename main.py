@@ -18,6 +18,8 @@ import webapp2
 import jinja2
 import re
 import hmac
+import random
+from string import letters
 
 from google.appengine.ext import db
 
@@ -52,14 +54,15 @@ def check_secure_val(secure_val):
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         """
-        Writes output to client browser
+        Writes the output to client browser
         """
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
         """
-        Render HTML Templates
+        Renders the html template
         """
+        params['user'] = self.user
         return render_str(template, **params)
 
     def render(self, template, **kw):
@@ -67,24 +70,39 @@ class BaseHandler(webapp2.RequestHandler):
 
     def set_secure_cookie(self, name, val):
         """
-        Creates a cookie to the browser
+        Sets a secure cookie to the browser
         """
-        cookie_val = self.response.headers.add_header(
+        cookie_val = make_secure_val(val)
         self.response.headers.add_header(
             'Set-Cookie',
             '%s=%s; Path=/' % (name, cookie_val))
 
-     def read_secure_cookie(self, name):
+    def read_secure_cookie(self, name):
+        """
+        Read the secure cookie from browser
+        """
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
 
-     def initialize(self, *a, **kw):
-         """
-         Initialize the cookie session for the website
-         """
-         webapp2.RequestHandler.initialize(self, *a, **kw)
-         uid = self.read_secure_cookie('user_id')
-         self.user = uid and User.by_id(int(uid))
+    def login(self, user):
+        """
+        Checking for user
+        """
+        self.set_secure_cookie('user_id', str(user.key().id()))
+
+    def logout(self):
+        """
+        Removes login information from browser and cookie
+        """
+        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+
+    def initialize(self, *a, **kw):
+        """
+        Initialize session to blog from the user session
+        """
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.by_id(int(uid))
 
 
 
@@ -96,19 +114,18 @@ def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
 # Blogging Function
+
 class MainPage(BaseHandler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc limit 10")
         self.render('front.html', posts= posts)
-
-
 
 # Post Function
 class Post(db.Model):
     """
     Attributes for the Post datastore
     """
-    # userid = db.IntegerProperty(required=True)
+    userid = db.IntegerProperty(required=True)
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -147,7 +164,10 @@ class PostPage(BaseHandler):
 
 class NewPostPage(BaseHandler):
     def get(self):
-        self.render("newpost.html")
+        if self.user:
+            self.render("newpost.html")
+        else:
+            self.redirect('/login')
 
     def post(self):
         subject = self.request.get('subject')
@@ -162,6 +182,55 @@ class NewPostPage(BaseHandler):
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
 
+#Edit Post
+class EditPost(BaseHandler):
+    def get(self, post_id):
+        if self.user:
+            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+            post = db.get(key)
+            user_key = self.user.key().id()
+            if post.user_id != user_key:
+                error = 'Editing Post is not allowed'
+                self.redirect("/blog/", post_id = post_id ,error_msg = error)
+            else:
+                self.render("editpost.html", subject = subject, content = content)
+        else:
+            error = 'You must login to view the post'
+            self.redirect("/login")
+
+    def post(self):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        uid = self.read_secure_cookie('user_id')
+
+        subject = self.request.get('subject')
+        content = self.request.get('post_text')
+
+        if subject and content:
+            p = Post(parent = blog_key(), subject = subject, content = content)
+            p.put()
+            self.redirect('/')
+            self.redirect('/blog/%s' %str(p.key().id()))
+
+#Delete Post
+class DeletePost(BaseHandler):
+    def get(self,post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+
+        uid = self.read_secure_cookie('user_id')
+
+        if post.user_id != uid:
+            post_error = 'Delete Post is not valid'
+        else:
+            post_error = ''
+            db.delete(key)
+
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -175,11 +244,10 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-#Registration, Login, and Logout for User
+#SignUp, Registration, Login, and Logout for User
 
 class SignUpPage(BaseHandler):
     """
-    Still Working on this function.
     Sign Up Page. Getting username, password, email,
     and verification of password from user input.
     """
@@ -187,8 +255,9 @@ class SignUpPage(BaseHandler):
         self.render("signup.html")
 
     def post(self):
-        have_error = False
+        signup_error = False
         username = self.request.get('username')
+        print self.username
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
@@ -198,20 +267,20 @@ class SignUpPage(BaseHandler):
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
-            have_error = True
+            signup_error = True
 
         if not valid_password(self.password):
             params['error_password'] = "Invalid password"
-            have_error = True
+            signup_error = True
         elif self.password != self.verify:
             params['error_verify'] = "Password does not match"
-            have_error = True
+            signup_error = True
 
         if not valid_email(self.email):
             params['error_email'] = "Invalid Email"
-            have_error = True
+            signup_error = True
 
-        if have_error:
+        if signup_error:
             self.render('signup-form.html', **params)
         else:
             self.done()
@@ -219,7 +288,7 @@ class SignUpPage(BaseHandler):
     def done(self, *a, **kw):
         raise NotImplementedError
 
-class Registration(Signup):
+class Registration(SignUpPage):
     def done(self):
         """
         Make sure user exists
@@ -232,8 +301,25 @@ class Registration(Signup):
         else:
             u = User.register(self.username, self.password, self.email)
             u.put()
+            self.login(u)
             self.redirect('/')
-#User
+#User stuff
+
+def make_salt(length = 5):
+    return ''.join(random.choice(letters) for x in xrange(length))
+
+def make_pw_hash(name, pw, salt=None):
+    if not salt:
+        salt = make_salt()
+    h = hashlib.sha256(name + pw + salt).hexdigest()
+    return '%s, %s' %(salt, h)
+
+def valid_pw(name, password, h):
+    salt = h.split(',')[0]
+    return h == make_pw_hash(name, pw, salt)
+
+def users_key(group='default'):
+    return db.Key.from_path('users', )
 
 class User(db.Model):
     """
@@ -269,12 +355,51 @@ class User(db.Model):
                     pw_hash = pw_hash,
                     email = email)
 
+    @classmethod
+    def login(self, name, pw):
+        u = self.by_name(name)
+        if u and valid_pw(name, pw, u.pw_hash):
+            return u
 
 
+#Login class
+class LoginPage(BaseHandler):
+    def get(self):
+        self.render("login.html")
+
+    def post(self):
+        self.request.get('username')
+        self.request.get('password')
+
+        u = User.login(username, password)
+
+        if u:
+            self.login(u)
+            self.redirect('/')
+        else:
+            msg = "Login not valid"
+            self.render('login.html', error = msg)
+
+#Logout
+class Logout(BaseHandler):
+    def get(self):
+        self.logout()
+        self.redirect('/')
+
+class WelcomePage(BaseHandler):
+    def get(self):
+        username = self.request.get('username')
+        if valid_username(username):
+            self.render('welcome.html', username = username)
+        else:
+            self.redirect('/login')
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
+                               ('/welcome', WelcomePage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
-                               ('/signup', SignUpPage)
+                               ('/blog/editpost', EditPost),
+                               ('/signup', SignUpPage),
+                               ('/login', LoginPage)
                               ], debug=True)
