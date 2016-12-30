@@ -125,7 +125,7 @@ class Post(db.Model):
     """
     Attributes for the Post datastore
     """
-    userid = db.IntegerProperty(required=True)
+    # userid = db.IntegerProperty(required=True)
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -164,10 +164,10 @@ class PostPage(BaseHandler):
 
 class NewPostPage(BaseHandler):
     def get(self):
-        if self.user:
+        # if self.user:
             self.render("newpost.html")
-        else:
-            self.redirect('/login')
+        # else:
+        #     self.redirect('/login')
 
     def post(self):
         subject = self.request.get('subject')
@@ -256,11 +256,11 @@ class SignUpPage(BaseHandler):
 
     def post(self):
         signup_error = False
-        username = self.request.get('username')
-        print self.username
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+        print signup_error
+        self.username = self.request.get('username')
+        self.password = self.request.get('password')
+        self.verify = self.request.get('verify')
+        self.email = self.request.get('email')
 
         params = dict(username = self.username,
                       email = self.email)
@@ -270,23 +270,30 @@ class SignUpPage(BaseHandler):
             signup_error = True
 
         if not valid_password(self.password):
-            params['error_password'] = "Invalid password"
+            params['error_password'] = "Password not valid"
             signup_error = True
         elif self.password != self.verify:
-            params['error_verify'] = "Password does not match"
+            params['error_verify'] = "Your passwords didn't match."
             signup_error = True
 
         if not valid_email(self.email):
-            params['error_email'] = "Invalid Email"
+            params['error_email'] = "Email not valid"
             signup_error = True
 
         if signup_error:
-            self.render('signup-form.html', **params)
+            self.render('signup.html', **params)
         else:
             self.done()
 
     def done(self, *a, **kw):
         raise NotImplementedError
+
+class SignUpComplete(SignUpPage):
+    """
+    Shows the welcome page after the user is signup
+    """
+    def done(self):
+        self.redirect('/welcome?username' + self.username)
 
 class Registration(SignUpPage):
     def done(self):
@@ -302,7 +309,9 @@ class Registration(SignUpPage):
             u = User.register(self.username, self.password, self.email)
             u.put()
             self.login(u)
-            self.redirect('/')
+            self.redirect('/blog')
+
+
 #User stuff
 
 def make_salt(length = 5):
@@ -368,8 +377,8 @@ class LoginPage(BaseHandler):
         self.render("login.html")
 
     def post(self):
-        self.request.get('username')
-        self.request.get('password')
+        username = self.request.get('username')
+        password = self.request.get('password')
 
         u = User.login(username, password)
 
