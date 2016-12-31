@@ -125,7 +125,7 @@ class Post(db.Model):
     """
     Attributes for the Post datastore
     """
-    # userid = db.IntegerProperty(required=True)
+    #userid = db.IntegerProperty(required=True)
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -164,10 +164,10 @@ class PostPage(BaseHandler):
 
 class NewPostPage(BaseHandler):
     def get(self):
-        # if self.user:
+         if self.user:
             self.render("newpost.html")
-        # else:
-        #     self.redirect('/login')
+         else:
+             self.redirect('/login')
 
     def post(self):
         subject = self.request.get('subject')
@@ -256,14 +256,18 @@ class SignUpPage(BaseHandler):
 
     def post(self):
         signup_error = False
-        print signup_error
         self.username = self.request.get('username')
+        print self.username
         self.password = self.request.get('password')
+        print self.password
         self.verify = self.request.get('verify')
+        print self.verify
         self.email = self.request.get('email')
+        print self.email
 
         params = dict(username = self.username,
                       email = self.email)
+        print params
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
@@ -301,6 +305,7 @@ class Registration(SignUpPage):
         Make sure user exists
         """
         u = User.by_name(self.username)
+        print u
 
         if u:
             msg = "User name exists"
@@ -308,8 +313,9 @@ class Registration(SignUpPage):
         else:
             u = User.register(self.username, self.password, self.email)
             u.put()
+
             self.login(u)
-            self.redirect('/blog')
+            self.redirect('/')
 
 
 #User stuff
@@ -335,6 +341,7 @@ class User(db.Model):
     Stores user information
     """
     name = db.StringProperty(required = True)
+    print name
     pw_hash = db.StringProperty(required = True)
     email = db.StringProperty
 
@@ -354,7 +361,7 @@ class User(db.Model):
         return u
 
     @classmethod
-    def register(self, pw, email = None):
+    def register(self, name, pw, email = None):
         """
         Creates the new user in the User object.
         """
@@ -397,8 +404,7 @@ class Logout(BaseHandler):
 
 class WelcomePage(BaseHandler):
     def get(self):
-        username = self.request.get('username')
-        if valid_username(username):
+        if self.user:
             self.render('welcome.html', username = username)
         else:
             self.redirect('/login')
@@ -409,6 +415,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost', EditPost),
+                               ('blog/deletepost', DeletePost),
                                ('/signup', SignUpPage),
                                ('/login', LoginPage)
                               ], debug=True)
