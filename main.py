@@ -20,8 +20,9 @@ import re
 import hmac
 import random
 from string import letters
+from models import Post
 
-from google.appengine.ext import db
+
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
@@ -102,7 +103,7 @@ class BaseHandler(webapp2.RequestHandler):
         """
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.by_id(int(uid))
+        self.user = User.gql("WHERE username = %s" % username).get()
 
 
 
@@ -110,39 +111,24 @@ def render_post(response, post):
     response.out.write('<b>' + post.subject + '<b><br>')
     response.out.write('post.content')
 
-def blog_key(name='default'):
-    return db.Key.from_path('blogs', name)
 
 # Blogging Function
 
 class MainPage(BaseHandler):
     def get(self):
-        posts = db.GqlQuery("select * from Post order by created desc limit 10")
+        posts = ndb.GqlQuery("select * from Post order by created desc limit 10")
         self.render('front.html', posts= posts)
 
+
 # Post Function
-class Post(db.Model):
-    """
-    Attributes for the Post datastore
-    """
-    #userid = db.IntegerProperty(required=True)
-    subject = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
-
-    def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
-
 
 class PostPage(BaseHandler):
     def get(self, post_id):
         """
         Renders Posts to home page
         """
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
 
 
         if not post:
@@ -154,8 +140,8 @@ class PostPage(BaseHandler):
         """
         Loops through the posts
         """
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
 
         if not post:
             self.error(404)
@@ -290,17 +276,6 @@ class SignUpPage(BaseHandler):
             self.done()
 
     def done(self, *a, **kw):
-        raise NotImplementedError
-
-class SignUpComplete(SignUpPage):
-    """
-    Shows the welcome page after the user is signup
-    """
-    def done(self):
-        self.redirect('/welcome?username' + self.username)
-
-class Registration(SignUpPage):
-    def done(self):
         """
         Make sure user exists
         """
@@ -313,10 +288,8 @@ class Registration(SignUpPage):
         else:
             u = User.register(self.username, self.password, self.email)
             u.put()
-
             self.login(u)
-            self.redirect('/')
-
+            self.redirect('/welcome?username' + self.username)
 
 #User stuff
 
@@ -335,48 +308,6 @@ def valid_pw(name, password, h):
 
 def users_key(group='default'):
     return db.Key.from_path('users', )
-
-class User(db.Model):
-    """
-    Stores user information
-    """
-    name = db.StringProperty(required = True)
-    print name
-    pw_hash = db.StringProperty(required = True)
-    email = db.StringProperty
-
-    @classmethod
-    def by_id(self, uid):
-        """
-        Returns user id from User object
-        """
-        return User.get_by_id(uid, parent = users_key())
-
-    @classmethod
-    def by_name(self, name):
-        """
-        Fetchs users by name from the User object
-        """
-        u = User.all().filter('name=', name).get()
-        return u
-
-    @classmethod
-    def register(self, name, pw, email = None):
-        """
-        Creates the new user in the User object.
-        """
-        pw_hash = make_pw_hash(name, pw)
-        return User(parent = users_key,
-                    name = name,
-                    pw_hash = pw_hash,
-                    email = email)
-
-    @classmethod
-    def login(self, name, pw):
-        u = self.by_name(name)
-        if u and valid_pw(name, pw, u.pw_hash):
-            return u
-
 
 #Login class
 class LoginPage(BaseHandler):
