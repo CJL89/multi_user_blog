@@ -20,7 +20,7 @@ import re
 import hmac
 import random
 from string import letters
-from models import Post
+from models import Post, User
 
 
 
@@ -103,7 +103,7 @@ class BaseHandler(webapp2.RequestHandler):
         """
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = User.gql("WHERE username = %s" % username).get()
+        self.user = User.gql("WHERE uid = %s" % uid).get()
 
 
 
@@ -172,8 +172,8 @@ class NewPostPage(BaseHandler):
 class EditPost(BaseHandler):
     def get(self, post_id):
         if self.user:
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
+            key = ndb.Key('Post', int(post_id), parent=blog_key())
+            post = key.get()
             user_key = self.user.key().id()
             if post.user_id != user_key:
                 error = 'Editing Post is not allowed'
@@ -185,8 +185,8 @@ class EditPost(BaseHandler):
             self.redirect("/login")
 
     def post(self):
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
 
         uid = self.read_secure_cookie('user_id')
 
@@ -202,8 +202,8 @@ class EditPost(BaseHandler):
 #Delete Post
 class DeletePost(BaseHandler):
     def get(self,post_id):
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
 
         if not post:
             self.error(404)
