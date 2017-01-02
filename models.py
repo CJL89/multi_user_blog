@@ -1,23 +1,10 @@
 # Models for the Blogs
+import main
 
 from google.appengine.ext import ndb
 
-def blog_key(name='default'):
-    return ndb.Key('blogs', name)
 
-class Post(ndb.Model):
-    """
-    Attributes for the Post datastore
-    """
-    #userid = db.IntegerProperty(required=True)
-    subject = ndb.StringProperty(required=True)
-    content = ndb.TextProperty(required=True)
-    created = ndb.DateTimeProperty(auto_now_add=True)
-    last_modified = ndb.DateTimeProperty(auto_now=True)
 
-    def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
 
 class User(ndb.Model):
     """
@@ -39,7 +26,7 @@ class User(ndb.Model):
         """
         Fetchs users by name from the User object
         """
-        u = User.all().filter('name=', name).get()
+        u = User.query().filter(ndb.GenericProperty ('name=') == name).get()
         return u
 
     @classmethod

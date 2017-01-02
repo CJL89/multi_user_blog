@@ -20,8 +20,9 @@ import re
 import hmac
 import random
 from string import letters
-from models import Post, User
+from models import User
 
+from google.appengine.ext import ndb
 
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -103,7 +104,7 @@ class BaseHandler(webapp2.RequestHandler):
         """
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = User.gql("WHERE uid = %s" % uid).get()
+        self.user = uid and User.by_id(int(uid))
 
 
 
@@ -116,11 +117,27 @@ def render_post(response, post):
 
 class MainPage(BaseHandler):
     def get(self):
-        posts = ndb.GqlQuery("select * from Post order by created desc limit 10")
+        posts = Post.query().order(Post.created)
         self.render('front.html', posts= posts)
 
 
 # Post Function
+def blog_key(name='default'):
+    return ndb.Key('blogs', name)
+
+class Post(ndb.Model):
+    """
+    Attributes for the Post datastore
+    """
+    #userid = db.IntegerProperty(required=True)
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("post.html", p = self)
 
 class PostPage(BaseHandler):
     def get(self, post_id):
@@ -163,7 +180,7 @@ class NewPostPage(BaseHandler):
             p = Post(parent = blog_key(), subject = subject, content = content)
             p.put()
             self.redirect('/')
-            self.redirect('/blog/%s' %str(p.key().id()))
+            self.redirect('/blog/%s' % str(p.key.integer_id()))
         else:
             error = "Please enter Subject and Content"
             self.render("newpost.html", subject= subject, content = content, error = error)
@@ -253,7 +270,6 @@ class SignUpPage(BaseHandler):
 
         params = dict(username = self.username,
                       email = self.email)
-        print params
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
@@ -280,7 +296,6 @@ class SignUpPage(BaseHandler):
         Make sure user exists
         """
         u = User.by_name(self.username)
-        print u
 
         if u:
             msg = "User name exists"
@@ -307,7 +322,7 @@ def valid_pw(name, password, h):
     return h == make_pw_hash(name, pw, salt)
 
 def users_key(group='default'):
-    return db.Key.from_path('users', )
+    return ndb.Key('users', group)
 
 #Login class
 class LoginPage(BaseHandler):
