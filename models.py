@@ -1,10 +1,28 @@
 # Models for the Blogs
 import main
-
 from google.appengine.ext import ndb
 
+# Blog- Post Model
+def blog_key(name='default'):
+    return ndb.Key('blogs', name)
 
+class Post(ndb.Model):
+    """
+    Attributes for the Post datastore
+    """
+    #userid = db.IntegerProperty(required=True)
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
 
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return main.render_str("post.html", p = self)
+
+#Blog - User Model
+def users_key(group='default'):
+    return ndb.Key('users', group)
 
 class User(ndb.Model):
     """
@@ -12,7 +30,7 @@ class User(ndb.Model):
     """
     name = ndb.StringProperty(required = True)
     pw_hash = ndb.StringProperty(required = True)
-    email = ndb.StringProperty
+    email = ndb.StringProperty()
 
     @classmethod
     def by_id(self, uid):
@@ -34,7 +52,7 @@ class User(ndb.Model):
         """
         Creates the new user in the User object.
         """
-        pw_hash = make_pw_hash(name, pw)
+        pw_hash = main.make_pw_hash(name, pw)
         return User(parent = users_key,
                     name = name,
                     pw_hash = pw_hash,

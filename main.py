@@ -20,7 +20,7 @@ import re
 import hmac
 import random
 from string import letters
-from models import User
+from models import User, Post
 
 from google.appengine.ext import ndb
 
@@ -122,23 +122,6 @@ class MainPage(BaseHandler):
 
 
 # Post Function
-def blog_key(name='default'):
-    return ndb.Key('blogs', name)
-
-class Post(ndb.Model):
-    """
-    Attributes for the Post datastore
-    """
-    #userid = db.IntegerProperty(required=True)
-    subject = ndb.StringProperty(required=True)
-    content = ndb.TextProperty(required=True)
-    created = ndb.DateTimeProperty(auto_now_add=True)
-    last_modified = ndb.DateTimeProperty(auto_now=True)
-
-    def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
-
 class PostPage(BaseHandler):
     def get(self, post_id):
         """
@@ -259,6 +242,7 @@ class SignUpPage(BaseHandler):
 
     def post(self):
         signup_error = False
+        print signup_error
         self.username = self.request.get('username')
         print self.username
         self.password = self.request.get('password')
@@ -271,20 +255,30 @@ class SignUpPage(BaseHandler):
         params = dict(username = self.username,
                       email = self.email)
 
+        print "Checking username validity"
+
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
             signup_error = True
+            print "User: " + str(signup_error)
+
+        print "Checking password validity"
 
         if not valid_password(self.password):
             params['error_password'] = "Password not valid"
             signup_error = True
+            print "Password: " + str(signup_error)
         elif self.password != self.verify:
             params['error_verify'] = "Your passwords didn't match."
             signup_error = True
+            print "Verification: " + str(signup_error)
 
-        if not valid_email(self.email):
+        print "Checking email validity"
+
+        if len(self.email) > 0 and not valid_email(self.email):
             params['error_email'] = "Email not valid"
             signup_error = True
+            print "Email: " + str(signup_error)
 
         if signup_error:
             self.render('signup.html', **params)
@@ -295,6 +289,7 @@ class SignUpPage(BaseHandler):
         """
         Make sure user exists
         """
+        print "In done function"
         u = User.by_name(self.username)
 
         if u:
@@ -302,7 +297,8 @@ class SignUpPage(BaseHandler):
             self.render('signup.html', error_username = msg)
         else:
             u = User.register(self.username, self.password, self.email)
-            u.put()
+            key = u.put()
+            print "key is  " + key.get()
             self.login(u)
             self.redirect('/welcome?username' + self.username)
 
@@ -320,9 +316,6 @@ def make_pw_hash(name, pw, salt=None):
 def valid_pw(name, password, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
-
-def users_key(group='default'):
-    return ndb.Key('users', group)
 
 #Login class
 class LoginPage(BaseHandler):
