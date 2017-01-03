@@ -22,7 +22,7 @@ import random
 from string import letters
 from models import User, Post
 
-from google.appengine.ext import ndb
+
 
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -267,25 +267,25 @@ class SignUpPage(BaseHandler):
         if not valid_password(self.password):
             params['error_password'] = "Password not valid"
             signup_error = True
-            print "Password: " + str(signup_error)
+            print "Password validation failed"
         elif self.password != self.verify:
             params['error_verify'] = "Your passwords didn't match."
             signup_error = True
-            print "Verification: " + str(signup_error)
+            print "Password doesn't match confirmed password."
 
         print "Checking email validity"
 
         if len(self.email) > 0 and not valid_email(self.email):
             params['error_email'] = "Email not valid"
             signup_error = True
-            print "Email: " + str(signup_error)
+            print "Invalid email"
 
         if signup_error:
             self.render('signup.html', **params)
         else:
             self.done()
 
-    def done(self, *a, **kw):
+    def done(self):
         """
         Make sure user exists
         """
