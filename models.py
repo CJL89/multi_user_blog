@@ -22,6 +22,7 @@ class Post(ndb.Model):
 
 #Blog - User Model
 def users_key(group='default'):
+    print ndb.Key('users', group)
     return ndb.Key('users', group)
 
 class User(ndb.Model):

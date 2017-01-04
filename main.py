@@ -18,6 +18,7 @@ import webapp2
 import jinja2
 import re
 import hmac
+import hashlib
 import random
 from string import letters
 from models import User, Post
@@ -217,6 +218,8 @@ class DeletePost(BaseHandler):
             post_error = ''
             db.delete(key)
 
+
+
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -260,7 +263,7 @@ class SignUpPage(BaseHandler):
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
             signup_error = True
-            print "User: " + str(signup_error)
+            print "User name not valid"
 
         print "Checking password validity"
 
@@ -291,12 +294,12 @@ class SignUpPage(BaseHandler):
         """
         print "In done function"
         u = User.by_name(self.username)
-
         if u:
             msg = "User name exists"
             self.render('signup.html', error_username = msg)
         else:
             u = User.register(self.username, self.password, self.email)
+            print u
             key = u.put()
             print "key is  " + key.get()
             self.login(u)
