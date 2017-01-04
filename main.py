@@ -20,11 +20,11 @@ import re
 import hmac
 import hashlib
 import random
+import models
 from string import letters
 from models import User, Post
 
-
-
+from google.appengine.ext import ndb
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
@@ -39,20 +39,6 @@ def render_str(template, **params):
 #Creating a security around using the secret variable
 
 secret = 'test_security'
-
-def make_secure_val(val):
-    """
-    Creates the secure value using a secret.
-    """
-    return '%s|%s' %(val, hmac.new(secret, val).hexdigest())
-def check_secure_val(secure_val):
-    """
-    Verification of the secure value against the secret
-    """
-    val = secure_val.split('|')[0]
-    if secure_val == make_secure_val(val):
-        return val
-
 
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -91,7 +77,8 @@ class BaseHandler(webapp2.RequestHandler):
         """
         Checking for user
         """
-        self.set_secure_cookie('user_id', str(user.key().id()))
+        self.set_secure_cookie('user_id', str(user.key.id()))
+
 
     def logout(self):
         """
@@ -128,7 +115,7 @@ class PostPage(BaseHandler):
         """
         Renders Posts to home page
         """
-        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        key = ndb.Key('Post', int(post_id), parent= models.blog_key())
         post = key.get()
 
 
@@ -141,7 +128,7 @@ class PostPage(BaseHandler):
         """
         Loops through the posts
         """
-        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
         if not post:
@@ -161,7 +148,7 @@ class NewPostPage(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content)
+            p = Post(parent = models.blog_key(), subject = subject, content = content)
             p.put()
             self.redirect('/')
             self.redirect('/blog/%s' % str(p.key.integer_id()))
@@ -245,7 +232,7 @@ class SignUpPage(BaseHandler):
 
     def post(self):
         signup_error = False
-        print signup_error
+       # print signup_error
         self.username = self.request.get('username')
         print self.username
         self.password = self.request.get('password')
@@ -294,14 +281,17 @@ class SignUpPage(BaseHandler):
         """
         print "In done function"
         u = User.by_name(self.username)
+        print u
         if u:
             msg = "User name exists"
             self.render('signup.html', error_username = msg)
         else:
+            print self.username
+            print self.password
+            print self.email
             u = User.register(self.username, self.password, self.email)
-            print u
             key = u.put()
-            print "key is  " + key.get()
+            print key
             self.login(u)
             self.redirect('/welcome?username' + self.username)
 
@@ -319,6 +309,20 @@ def make_pw_hash(name, pw, salt=None):
 def valid_pw(name, password, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
+
+def make_secure_val(val):
+    """
+    Creates the secure value using a secret.
+    """
+    return '%s|%s' %(val, hmac.new(secret, val).hexdigest())
+def check_secure_val(secure_val):
+    """
+    Verification of the secure value against the secret
+    """
+    val = secure_val.split('|')[0]
+    if secure_val == make_secure_val(val):
+        return val
+
 
 #Login class
 class LoginPage(BaseHandler):
@@ -346,6 +350,7 @@ class Logout(BaseHandler):
 
 class WelcomePage(BaseHandler):
     def get(self):
+        username = self.request.get('username')
         if self.user:
             self.render('welcome.html', username = username)
         else:

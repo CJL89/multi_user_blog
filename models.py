@@ -10,7 +10,7 @@ class Post(ndb.Model):
     """
     Attributes for the Post datastore
     """
-    userid = ndb.IntegerProperty(required=True)
+    #userid = ndb.IntegerProperty(required=True)
     subject = ndb.StringProperty(required=True)
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -22,7 +22,6 @@ class Post(ndb.Model):
 
 #Blog - User Model
 def users_key(group='default'):
-    print ndb.Key('users', group)
     return ndb.Key('users', group)
 
 class User(ndb.Model):
@@ -54,7 +53,8 @@ class User(ndb.Model):
         Creates the new user in the User object.
         """
         pw_hash = main.make_pw_hash(name, pw)
-        return User(parent = users_key,
+        print pw_hash
+        return User(parent = users_key(),
                     name = name,
                     pw_hash = pw_hash,
                     email = email)
