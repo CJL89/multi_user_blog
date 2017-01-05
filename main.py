@@ -13,6 +13,7 @@
 # limitations under the License.
 
 #Dependecies for tha application
+
 import os
 import webapp2
 import jinja2
@@ -210,6 +211,7 @@ class DeletePost(BaseHandler):
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
+    # type: (object) -> object
     return username and USER_RE.match(username)
 
 PASS_RE = re.compile(r"^.{3,20}$")
@@ -234,13 +236,13 @@ class SignUpPage(BaseHandler):
         signup_error = False
        # print signup_error
         self.username = self.request.get('username')
-        print self.username
+        #print self.username
         self.password = self.request.get('password')
-        print self.password
+        #print self.password
         self.verify = self.request.get('verify')
-        print self.verify
+        #print self.verify
         self.email = self.request.get('email')
-        print self.email
+        #print self.email
 
         params = dict(username = self.username,
                       email = self.email)
@@ -263,13 +265,6 @@ class SignUpPage(BaseHandler):
             signup_error = True
             print "Password doesn't match confirmed password."
 
-        print "Checking email validity"
-
-        if len(self.email) > 0 and not valid_email(self.email):
-            params['error_email'] = "Email not valid"
-            signup_error = True
-            print "Invalid email"
-
         if signup_error:
             self.render('signup.html', **params)
         else:
@@ -286,13 +281,15 @@ class SignUpPage(BaseHandler):
             msg = "User name exists"
             self.render('signup.html', error_username = msg)
         else:
-            print self.username
-            print self.password
-            print self.email
+            #print self.username
+            #print self.password
+            #print self.email
             u = User.register(self.username, self.password, self.email)
+            print u
             key = u.put()
             print key
             self.login(u)
+            print self.login(u)
             self.redirect('/welcome?username' + self.username)
 
 #User stuff
@@ -304,9 +301,9 @@ def make_pw_hash(name, pw, salt=None):
     if not salt:
         salt = make_salt()
     h = hashlib.sha256(name + pw + salt).hexdigest()
-    return '%s, %s' %(salt, h)
+    return '%s,%s' %(salt, h)
 
-def valid_pw(name, password, h):
+def valid_pw(name, pw, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
 
@@ -334,7 +331,8 @@ class LoginPage(BaseHandler):
         password = self.request.get('password')
 
         u = User.login(username, password)
-
+        print "Inside post"
+        print u
         if u:
             self.login(u)
             self.redirect('/')

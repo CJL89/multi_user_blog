@@ -44,7 +44,7 @@ class User(ndb.Model):
         """
         Fetchs users by name from the User object
         """
-        u = User.query().filter(ndb.GenericProperty ('name=') == name).get()
+        u = User.query().filter(ndb.GenericProperty('name')==name).get()
         return u
 
     @classmethod
@@ -53,14 +53,18 @@ class User(ndb.Model):
         Creates the new user in the User object.
         """
         pw_hash = main.make_pw_hash(name, pw)
-        print pw_hash
         return User(parent = users_key(),
                     name = name,
                     pw_hash = pw_hash,
                     email = email)
 
+
     @classmethod
     def login(self, name, pw):
         u = self.by_name(name)
+        print "Inside login method"
+        print u
         if u and main.valid_pw(name, pw, u.pw_hash):
             return u
+        else:
+            print "Not valid"
