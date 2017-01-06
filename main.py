@@ -275,22 +275,20 @@ class SignUpPage(BaseHandler):
         Make sure user exists
         """
         print "In done function"
-        u = User.by_name(self.username)
+        u = User.by_name(self.user.name)
         print u
         if u:
             msg = "User name exists"
             self.render('signup.html', error_username = msg)
         else:
-            #print self.username
-            #print self.password
-            #print self.email
             u = User.register(self.username, self.password, self.email)
-            print u
             key = u.put()
-            print key
+            usercookie = make_secure_val(str(username))
+            self.response.headers.add_header(
+                'Set-Cookie',
+                '%s=%s; Path=/' % usercookie)
             self.login(u)
-            print self.login(u)
-            self.redirect('/welcome?username' + self.username)
+            self.redirect('/welcome?username' + self.user.name)
 
 #User stuff
 
@@ -334,8 +332,9 @@ class LoginPage(BaseHandler):
         print "Inside post"
         print u
         if u:
+            #usercookie = make_secure_val(str())
             self.login(u)
-            self.redirect('/')
+            self.redirect('/welcome')
         else:
             msg = "Login not valid"
             self.render('login.html', error = msg)

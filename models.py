@@ -44,7 +44,9 @@ class User(ndb.Model):
         """
         Fetchs users by name from the User object
         """
+        print "In the by_name function"
         u = User.query().filter(ndb.GenericProperty('name')==name).get()
+        print u
         return u
 
     @classmethod
