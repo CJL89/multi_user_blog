@@ -10,7 +10,6 @@ class Post(ndb.Model):
     """
     Attributes for the Post datastore
     """
-    #userid = ndb.IntegerProperty(required=True)
     subject = ndb.StringProperty(required=True)
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)

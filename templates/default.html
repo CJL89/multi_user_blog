@@ -34,10 +34,15 @@
             <li class="active"><a href="/">Home</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
+            {% if user %}
+            Welcome: <span class = "login">{{user.name}}</span>
+            <a class = "btn btn-primary btn-lg" href="/logout" role = "button">logout</a>
+            <a class= "btn btn-primary btn-lg" href="/blog/newpost" role = "button">New Post</a>
+            <a class= "btn btn-primary btn-lg" href="/blog/editpost" role = "button">Edit Post</a>
+            {% else %}
             <a class= "btn btn-primary btn-lg" href="/signup" role = "button">Registration</a>
             <a class= "btn btn-primary btn-lg" href="/login" role = "button">Login</a>
-            <a class = "btn btn-primary btn-lg" href="/logout" role = "button">logout</a>
-            <a class= "btn btn-primary btn-lg" href="/blog/newpost" role = "button">Write a Post</a>
+            {% endif %}
             <!-- <li><a href="../navbar/">Register</a></li>
             <li class="active"><a href="./">Login<span class="sr-only">(current)</span></a></li> -->
           </ul>

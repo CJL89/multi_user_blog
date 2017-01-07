@@ -206,12 +206,15 @@ class DeletePost(BaseHandler):
             post_error = ''
             db.delete(key)
 
+# #CommentPost
+# class CommentPost(BaseHandler):
+
+
 
 
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
-    # type: (object) -> object
     return username and USER_RE.match(username)
 
 PASS_RE = re.compile(r"^.{3,20}$")
@@ -275,7 +278,7 @@ class SignUpPage(BaseHandler):
         Make sure user exists
         """
         print "In done function"
-        u = User.by_name(self.user.name)
+        u = User.by_name(self.username)
         print u
         if u:
             msg = "User name exists"
@@ -283,12 +286,8 @@ class SignUpPage(BaseHandler):
         else:
             u = User.register(self.username, self.password, self.email)
             key = u.put()
-            usercookie = make_secure_val(str(username))
-            self.response.headers.add_header(
-                'Set-Cookie',
-                '%s=%s; Path=/' % usercookie)
             self.login(u)
-            self.redirect('/welcome?username' + self.user.name)
+            self.redirect('/')
 
 #User stuff
 
@@ -332,34 +331,36 @@ class LoginPage(BaseHandler):
         print "Inside post"
         print u
         if u:
-            #usercookie = make_secure_val(str())
             self.login(u)
-            self.redirect('/welcome')
+            self.redirect('/')
         else:
             msg = "Login not valid"
             self.render('login.html', error = msg)
 
 #Logout
-class Logout(BaseHandler):
+class LogoutPage(BaseHandler):
     def get(self):
         self.logout()
         self.redirect('/')
 
-class WelcomePage(BaseHandler):
-    def get(self):
-        username = self.request.get('username')
-        if self.user:
-            self.render('welcome.html', username = username)
-        else:
-            self.redirect('/login')
+# class WelcomePage(BaseHandler):
+#     def get(self):
+#         print "Inside WelcomePage function"
+#         username = self.request.get('username')
+#         print username
+#         if self.user:
+#             self.render('welcome.html', username = username)
+#         else:
+#             self.redirect('/login')
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/welcome', WelcomePage),
+                            #    ('/welcome', WelcomePage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost', EditPost),
                                ('blog/deletepost', DeletePost),
                                ('/signup', SignUpPage),
-                               ('/login', LoginPage)
+                               ('/login', LoginPage),
+                               ('/logout', LogoutPage)
                               ], debug=True)
