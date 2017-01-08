@@ -78,6 +78,7 @@ class BaseHandler(webapp2.RequestHandler):
         """
         Checking for user
         """
+        print "Base Handler- Login Method"
         self.set_secure_cookie('user_id', str(user.key.id()))
 
 
@@ -93,6 +94,7 @@ class BaseHandler(webapp2.RequestHandler):
         """
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
+        print uid
         self.user = uid and User.by_id(int(uid))
 
 
@@ -206,8 +208,24 @@ class DeletePost(BaseHandler):
             post_error = ''
             db.delete(key)
 
-# #CommentPost
-# class CommentPost(BaseHandler):
+# CommentPost
+# class EditComment(BaseHandler):
+#     def get(self, post_id):
+#         """
+#         Renders comments to home page
+#         """
+#         key = ndb.Key('Post', int(post_id), parent= models.blog_key())
+#         post = key.get()
+#
+#         if not post:
+#             self.error(404)
+#             return
+#         self.render("permalink.html", post = post)
+#
+# #Delete Comment
+# class Delete Comment(BaseHandler):
+#     def get
+
 
 
 
@@ -254,6 +272,7 @@ class SignUpPage(BaseHandler):
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
+            print error_username
             signup_error = True
             print "User name not valid"
 
@@ -286,10 +305,14 @@ class SignUpPage(BaseHandler):
         else:
             u = User.register(self.username, self.password, self.email)
             key = u.put()
+            usercookie = make_secure_val(str(self.username))
+            self.response.headers.add_header("Set-Cookie",
+            "u=%s; Path=/" % usercookie)
             self.login(u)
             self.redirect('/')
 
 #User stuff
+
 
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
@@ -331,6 +354,10 @@ class LoginPage(BaseHandler):
         print "Inside post"
         print u
         if u:
+            usercookie = make_secure_val(str(username))
+            print usercookie
+            self.response.headers.add_header("Set-Cookie",
+            "u=%s; Path=/" % usercookie)
             self.login(u)
             self.redirect('/')
         else:
