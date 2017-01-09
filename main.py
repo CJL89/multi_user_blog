@@ -162,11 +162,11 @@ class NewPostPage(BaseHandler):
 #Edit Post
 class EditPost(BaseHandler):
     def get(self, post_id):
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
+        userkey = User.by_name(self.username).key.id()
         if self.user:
-            key = ndb.Key('Post', int(post_id), parent=blog_key())
-            post = key.get()
-            user_key = self.user.key().id()
-            if post.user_id != user_key:
+            if post.user_id() != userkey:
                 error = 'Editing Post is not allowed'
                 self.redirect("/blog/", post_id = post_id ,error_msg = error)
             else:
