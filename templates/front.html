@@ -3,10 +3,5 @@
 {% block content %}
     {% for p in posts %}
       {{ p.render() | safe }}
-      {% if user %}
-        <a href="/blog/editpost?p = {{p.key.id}}">Edit</a>
-        |
-        <a href="/blog/deletpost?p = {{p.key.id}}">Delete</a>
-      {% endif %}
    {% endfor %}
 {% endblock %}

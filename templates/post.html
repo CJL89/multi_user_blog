@@ -13,5 +13,10 @@
         {{p._render_text | safe}}
       </p>
     </div>
+    <div class="toggleButtons">
+      <a href="/blog/editpost?p = {{p.key.id}}">Edit</a>
+      |
+      <a href="/blog/deletpost?p = {{p.key.id}}">Delete</a>
+    </div>
   </div>
 </div>
