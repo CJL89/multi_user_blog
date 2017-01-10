@@ -165,11 +165,11 @@ class EditPost(BaseHandler):
         print "Inside my get edit function"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
-        #username = self.request.get('username')
-        userkey = User.by_name(self.user.name).key.id()
-        print userkey
+
+
+
         if self.user:
-            if post.key.id() != userkey:
+            if post.key.id() != self.user.key:
                 self.redirect('/blog/%s' %str(post.key.id()))
             else:
                 self.render("editpost.html", subject = subject, content = content)

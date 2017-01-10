@@ -14,6 +14,7 @@ class Post(ndb.Model):
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
     last_modified = ndb.DateTimeProperty(auto_now=True)
+    author = ndb.StructuredProperty(User)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -27,6 +28,7 @@ class User(ndb.Model):
     """
     Stores user information
     """
+    print "Inside User model class"
     name = ndb.StringProperty(required = True)
     pw_hash = ndb.StringProperty(required = True)
     email = ndb.StringProperty()
