@@ -162,13 +162,15 @@ class NewPostPage(BaseHandler):
 #Edit Post
 class EditPost(BaseHandler):
     def get(self, post_id):
-        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        print "Inside my get edit function"
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
-        userkey = User.by_name(self.username).key.id()
+        #username = self.request.get('username')
+        userkey = User.by_name(self.user.name).key.id()
+        print userkey
         if self.user:
-            if post.user_id() != userkey:
-                error = 'Editing Post is not allowed'
-                self.redirect("/blog/", post_id = post_id ,error_msg = error)
+            if post.key.id() != userkey:
+                self.redirect('/blog/%s' %str(post.key.id()))
             else:
                 self.render("editpost.html", subject = subject, content = content)
         else:
@@ -176,7 +178,7 @@ class EditPost(BaseHandler):
             self.redirect("/login")
 
     def post(self):
-        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
         uid = self.read_secure_cookie('user_id')
@@ -185,15 +187,19 @@ class EditPost(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content)
+            p = Post(parent = models.blog_key(), subject = subject, content = content)
             p.put()
             self.redirect('/')
             self.redirect('/blog/%s' %str(p.key().id()))
+        else:
+            error = "Please enter Subject and Content"
+            self.render("editpost.html", subject= subject, content = content, error = error)
+
 
 #Delete Post
 class DeletePost(BaseHandler):
     def get(self,post_id):
-        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
         if not post:
@@ -351,8 +357,7 @@ class LoginPage(BaseHandler):
         password = self.request.get('password')
 
         u = User.login(username, password)
-        print "Inside post"
-        print u
+
         if u:
             usercookie = make_secure_val(str(username))
             print usercookie
