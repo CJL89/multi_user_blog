@@ -1,0 +1,23 @@
+{% extends "default.html"%}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h2>Delete Post</h2>
+  </div>
+  <form method="post">
+    <label>
+      Do you really want to delete this post?
+      <button type="submit" class= "btn btn-primary btn-default-lg"name="submit" >Submit</button>
+      <button type= "cancel" class= "btn btn-primary btn-default-lg" name="back" >Cancel</button>
+    </label>
+  </form>
+  <button type="back" class= "btn btn-primary btn-default-lg"name="back" >Back</button>
+</div>
+{% if error %}
+<div class="alert alert-danger">
+  <span class = "glyphicon glyphicon-alert" aria-hidden= "true"></span>
+  {{error}}
+</div>
+{% endif %}
+{% endblock %}

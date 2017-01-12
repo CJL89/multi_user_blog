@@ -2,24 +2,6 @@
 import main
 from google.appengine.ext import ndb
 
-# Blog- Post Model
-def blog_key(name='default'):
-    return ndb.Key('blogs', name)
-
-class Post(ndb.Model):
-    """
-    Attributes for the Post datastore
-    """
-    subject = ndb.StringProperty(required=True)
-    content = ndb.TextProperty(required=True)
-    created = ndb.DateTimeProperty(auto_now_add=True)
-    last_modified = ndb.DateTimeProperty(auto_now=True)
-    author = ndb.StructuredProperty(User)
-
-    def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return main.render_str("post.html", p = self)
-
 #Blog - User Model
 def users_key(group='default'):
     return ndb.Key('users', group)
@@ -69,3 +51,22 @@ class User(ndb.Model):
             return u
         else:
             print "Not valid"
+
+
+# Blog- Post Model
+def blog_key(name='default'):
+    return ndb.Key('blogs', name)
+
+class Post(ndb.Model):
+    """
+    Attributes for the Post datastore
+    """
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
+    author = ndb.StructuredProperty(User)
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return main.render_str("post.html", p = self)

@@ -22,6 +22,7 @@ import hmac
 import hashlib
 import random
 import models
+import time
 from string import letters
 from models import User, Post
 
@@ -151,7 +152,7 @@ class NewPostPage(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = models.blog_key(), subject = subject, content = content)
+            p = Post(parent = models.blog_key(), subject = subject, content = content, author = self.user)
             p.put()
             self.redirect('/')
             self.redirect('/blog/%s' % str(p.key.integer_id()))
@@ -166,18 +167,16 @@ class EditPost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
-
-
         if self.user:
-            if post.key.id() != self.user.key:
-                self.redirect('/blog/%s' %str(post.key.id()))
+            if post.author.name != self.user.name:
+                self.redirect('/blog/%s' %str(post.key().id()))
             else:
-                self.render("editpost.html", subject = subject, content = content)
+                self.render("editpost.html", subject = post.subject, content = post.content)
         else:
             error = 'You must login to view the post'
             self.redirect("/login")
 
-    def post(self):
+    def post(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
@@ -187,10 +186,13 @@ class EditPost(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = models.blog_key(), subject = subject, content = content)
+            p = Post(parent = models.blog_key(), subject = post.subject, content = post.content)
+            p = key.get()
+            post.subject = subject
+            post.content = content
             p.put()
+            time.sleep(0.1)
             self.redirect('/')
-            self.redirect('/blog/%s' %str(p.key().id()))
         else:
             error = "Please enter Subject and Content"
             self.render("editpost.html", subject= subject, content = content, error = error)
@@ -201,18 +203,24 @@ class DeletePost(BaseHandler):
     def get(self,post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
-
         if not post:
             self.error(404)
             return
-
-        uid = self.read_secure_cookie('user_id')
-
-        if post.user_id != uid:
-            post_error = 'Delete Post is not valid'
+        if self.user:
+            self.render('deletepost.html', post = post)
         else:
-            post_error = ''
-            db.delete(key)
+            self.redirect('/login')
+
+    def post(self, post_id):
+        if not self.user:
+            return self.redirect('/login')
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
+
+        if post and post.author.name == self.user.name:
+            post.key.delete()
+            time.sleep(0.1)
+        self.redirect('/')
 
 # CommentPost
 # class EditComment(BaseHandler):
