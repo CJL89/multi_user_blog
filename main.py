@@ -222,19 +222,19 @@ class DeletePost(BaseHandler):
             time.sleep(0.1)
         self.redirect('/')
 
-# CommentPost
-# class EditComment(BaseHandler):
-#     def get(self, post_id):
-#         """
-#         Renders comments to home page
-#         """
-#         key = ndb.Key('Post', int(post_id), parent= models.blog_key())
-#         post = key.get()
-#
-#         if not post:
-#             self.error(404)
-#             return
-#         self.render("permalink.html", post = post)
+# Commenting
+class EditComment(BaseHandler):
+    def get(self, post_id):
+        """
+        Renders comments to home page
+        """
+        key = ndb.Key('Post', int(post_id), parent= models.blog_key())
+        post = key.get()
+
+        if not post:
+            self.error(404)
+            return
+        self.render("permalink.html", post = post)
 #
 # #Delete Comment
 # class Delete Comment(BaseHandler):
