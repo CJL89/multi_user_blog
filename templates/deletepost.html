@@ -8,11 +8,12 @@
   <form method="post">
     <label>
       Do you really want to delete this post?
-      <button type="submit" class= "btn btn-primary btn-default-lg"name="submit" >Submit</button>
-      <button type= "cancel" class= "btn btn-primary btn-default-lg" name="back" >Cancel</button>
+      <div class="extrabuttons">
+        <button type="submit" class= "btn btn-primary btn-default-lg"name="submit" >Submit</button>
+        <a class= "btn btn-primary btn-default-lg" href="/" role = "button">Back</a>
+      </div>
     </label>
   </form>
-  <button type="back" class= "btn btn-primary btn-default-lg"name="back" >Back</button>
 </div>
 {% if error %}
 <div class="alert alert-danger">

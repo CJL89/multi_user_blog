@@ -70,3 +70,9 @@ class Post(ndb.Model):
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return main.render_str("post.html", p = self)
+
+class Comment(ndb.model):
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    author = ndb.StructuredProperty(User)
