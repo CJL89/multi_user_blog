@@ -228,17 +228,61 @@ class EditComment(BaseHandler):
         """
         Renders comments to home page
         """
-        key = ndb.Key('Post', int(post_id), parent= models.blog_key())
-        post = key.get()
-
-        if not post:
+        key = ndb.Key('Comment', int(comment_id))
+        comment = key.get()
+        if not comment:
             self.error(404)
             return
-        self.render("permalink.html", post = post)
-#
+
+        if self.user:
+            self.render("editcomment.html", content = comment.content, post_id = comment.comment_id)
+        else:
+            self.redirect("/login")
+
+    def post(self, post_id):
+        """
+        """
+        key = ndb.Key('Comment', int(comment_id))
+        comment = key.get()
+        if not self.user:
+            return self.redirect("/login")
+            if comment and comment.author.username == self.user.name:
+                content = self.request.get("post_text")
+                comment.content = content
+                comment.put()
+                self.redirect("/blog/%s" %comment.comment_id)
+            else:
+                error = "Please enter Subject and Content"
+                self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = error)
+
+
 # #Delete Comment
-# class Delete Comment(BaseHandler):
-#     def get
+class DeleteComment(BaseHandler):
+    def get(self):
+        comment_id = self.request.get('post_text')
+        key = ndb.Key('Comment', int(comment_id))
+        comment = key.get()
+        if not comment:
+            self.error(404)
+            return
+
+        if self.user:
+            self.render("deletecomment.html",post_id = comment.comment_id)
+        else:
+            self.redirect("/login")
+
+    def post(self):
+        if not self.user:
+            return self.redirect("/login")
+
+        key = ndb.Key('Comment', int(comment_id))
+        comment = key.get()
+
+        if comment and comment.author.username == self.user.name:
+            comment.key.delete()
+            time.sleep(0.1)
+        self.redirect('/')
+
 
 
 
