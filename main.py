@@ -224,7 +224,7 @@ class DeletePost(BaseHandler):
 
 # Commenting
 class EditComment(BaseHandler):
-    def get(self, post_id):
+    def get(self, comment_id):
         """
         Renders comments to home page
         """
@@ -444,8 +444,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
-                               ('/blog/EditComment', EditComment),
-                               ('/blog/DeleteComment', DeleteComment),
+                               ('/blog/editcomment/([0-9]+)', EditComment),
+                               ('/blog/deletecomment/([0-9]+)', DeleteComment),
                                ('/signup', SignUpPage),
                                ('/login', LoginPage),
                                ('/logout', LogoutPage)
