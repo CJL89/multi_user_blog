@@ -239,7 +239,7 @@ class EditComment(BaseHandler):
         else:
             self.redirect("/login")
 
-    def post(self, post_id):
+    def post(self, comment_id):
         """
         """
         key = ndb.Key('Comment', int(comment_id))

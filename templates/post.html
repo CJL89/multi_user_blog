@@ -13,10 +13,17 @@
         {{p._render_text | safe}}
       </p>
     </div>
-    <div class="toggleButtons">
+    <div class="PostButtons">
       <a class= "btn btn-primary btn-default-md" href="/blog/editpost/{{p.key.id()}}">Edit</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
-      <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{p.key.id()}}">Comment</a>
+    </div>
+    <div class="CommentButtons">
+      {% for c in comments %}
+        {% if user %}
+        <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">EditComment</a>
+        <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
 </div>
