@@ -224,11 +224,15 @@ class DeletePost(BaseHandler):
 
 # Commenting
 class EditComment(BaseHandler):
-    def get(self, comment_id):
+    def get(self, post_id):
         """
         Renders comments to home page
         """
+        print "Inside EditComment Method"
+        comment_id = post_id
+        print comment_id
         key = ndb.Key('Comment', int(comment_id))
+        print key
         comment = key.get()
         if not comment:
             self.error(404)

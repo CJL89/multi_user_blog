@@ -16,29 +16,19 @@
     <div class="PostButtons">
       <a class= "btn btn-primary btn-default-md" href="/blog/editpost/{{p.key.id()}}">Add</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
-      <button type="submit" class="btn btn-primary btn-default-md" name="comment" id="comment" data-toggle="comment-modal" data-target=".commentModal">Comment</button>
-    </div>
-    <!-- Comment Modal -->
-    <div class="modal fade comment-modal" tabindex="-1" role ="dialog" aria-labelledby = "commentModal" aria-hidden = "true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class = "modal-title" id = "Comment">Comment</h4>
-          </div> <!-- modal header-->
-          <div class="modal-body">
-          </div><!-- modal body-->
-          <div class="modal-footer">
-            <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">Add</a>
-            <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
-          </div><!-- modal footer-->
-        </div><!-- modal content-->
-      </div><!-- modal dialog-->
+      <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{p.key.id()}}">Comment</a>
+      {% for c in comments %}
+      {% if c.author.name == user %}
+      <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
+      <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
+      {% endif %}
+    {% endfor %}
     </div>
     <!-- <div class="CommentButtons">
       {% for c in comments %}
         {% if c.author.name == self.user.name %}
-        <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">EditComment</a>
-        <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
+        <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">Add</a>
+        <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">Delete</a>
         {% endif %}
       {% endfor %}
     </div> -->

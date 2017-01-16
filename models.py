@@ -45,8 +45,6 @@ class User(ndb.Model):
     @classmethod
     def login(self, name, pw):
         u = self.by_name(name)
-        print "Inside login method"
-        print u
         if u and main.valid_pw(name, pw, u.pw_hash):
             return u
         else:
