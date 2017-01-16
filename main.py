@@ -223,41 +223,67 @@ class DeletePost(BaseHandler):
         self.redirect('/')
 
 # Commenting
+class CreateComment(BaseHandler):
+    """
+    Create the comment into database
+    """
+    def get(self):
+        if self.user:
+            self.render("editcomment.html")
+        else:
+            self.redirect('/')
+
+    def post(self):
+        """
+        Creates the new comment on single page
+        """
+
+        content = self.request.get('comment')
+
+        if content:
+            p = Comment(content = content, author = self.user)
+            p.put()
+            self.redirect('/')
+            self.redirect('/blog/%s' % str(p.key.integer_id()))
+        else:
+            error = "enter valid content"
+            self.render("editcomment.html",content = content, error = error)
+
 class EditComment(BaseHandler):
     def get(self, post_id):
         """
         Renders comments to home page
         """
         print "Inside EditComment Method"
-        comment_id = post_id
-        print comment_id
+
         key = ndb.Key('Comment', int(comment_id))
         print key
         comment = key.get()
         if not comment:
             self.error(404)
             return
-
+        print self.user
         if self.user:
             self.render("editcomment.html", content = comment.content, post_id = comment.comment_id)
         else:
             self.redirect("/login")
 
-    def post(self, comment_id):
+    def post(self, post_id):
         """
         """
         key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
         if not self.user:
             return self.redirect("/login")
+            print comment.author.username
             if comment and comment.author.username == self.user.name:
-                content = self.request.get("post_text")
+                content = self.request.get("comment")
                 comment.content = content
                 comment.put()
                 self.redirect("/blog/%s" %comment.comment_id)
             else:
-                error = "Please enter Subject and Content"
-                self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = error)
+                msg = "Enter your comment"
+                self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = msg)
 
 
 # #Delete Comment
@@ -286,11 +312,6 @@ class DeleteComment(BaseHandler):
             comment.key.delete()
             time.sleep(0.1)
         self.redirect('/')
-
-
-
-
-
 
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -374,8 +395,6 @@ class SignUpPage(BaseHandler):
             self.redirect('/')
 
 #User stuff
-
-
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
@@ -448,6 +467,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
+                               ('/blog/newcomment', CreateComment),
                                ('/blog/editcomment/([0-9]+)', EditComment),
                                ('/blog/deletecomment/([0-9]+)', DeleteComment),
                                ('/signup', SignUpPage),

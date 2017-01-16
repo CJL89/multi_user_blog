@@ -15,14 +15,14 @@
       <label for="password">Password: </label>
       <input type="password" name="password" class="form-control" id="password" value="">
     </div>
-    {% if error %}
-    <div class="alert alert-danger">
-      <span class = "glyphicon glyphicon-alert" aria-hidden= "true"></span>
-      {{error}}
-    </div>
-    {% endif %}
     <button type="submit" class= "btn btn-primary btn-default-lg">Submit</button>
   </form>
+  {% if error %}
+  <div class="alert alert-danger">
+    <span class = "glyphicon glyphicon-alert" aria-hidden= "true"></span>
+    {{error}}
+  </div>
+  {% endif %}
 </div>
 
 {% endblock %}
