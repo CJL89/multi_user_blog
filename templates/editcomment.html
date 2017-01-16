@@ -3,7 +3,7 @@
 {% block content%}
 <h2>Edit Comment</h2>
 <form method="post">
-  <textarea class ="content" name="post_text">{{content | safe}}</textarea>
+  <textarea class ="content" name="comment">{{content | safe}}</textarea>
   {% if error %}
   <div class="alert alert-danger">
     <span class = "glyphicon glyphicon-alert" aria-hidden= "true"></span>
