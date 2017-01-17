@@ -228,6 +228,7 @@ class CreateComment(BaseHandler):
     Create the comment into database
     """
     def get(self):
+        print "Inside CreateComment method"
         if self.user:
             self.render("editcomment.html")
         else:
@@ -256,7 +257,7 @@ class EditComment(BaseHandler):
         """
         print "Inside EditComment Method"
 
-        key = ndb.Key('Comment', int(comment_id))
+        key = ndb.Key('Comment', int(post_id))
         print key
         comment = key.get()
         if not comment:
@@ -271,7 +272,7 @@ class EditComment(BaseHandler):
     def post(self, post_id):
         """
         """
-        key = ndb.Key('Comment', int(comment_id))
+        key = ndb.Key('Comment', int(post_id))
         comment = key.get()
         if not self.user:
             return self.redirect("/login")
@@ -288,24 +289,24 @@ class EditComment(BaseHandler):
 
 # #Delete Comment
 class DeleteComment(BaseHandler):
-    def get(self):
+    def get(self, post_id):
         comment_id = self.request.get('post_text')
-        key = ndb.Key('Comment', int(comment_id))
+        key = ndb.Key('Comment', int(post_id))
         comment = key.get()
         if not comment:
             self.error(404)
             return
 
         if self.user:
-            self.render("deletecomment.html",post_id = comment.comment_id)
+            self.render("deletecomment.html",post_id = comment.post_id)
         else:
             self.redirect("/login")
 
-    def post(self):
+    def post(self, post_id):
         if not self.user:
             return self.redirect("/login")
 
-        key = ndb.Key('Comment', int(comment_id))
+        key = ndb.Key('Comment', int(post_id))
         comment = key.get()
 
         if comment and comment.author.username == self.user.name:
@@ -338,15 +339,10 @@ class SignUpPage(BaseHandler):
 
     def post(self):
         signup_error = False
-       # print signup_error
         self.username = self.request.get('username')
-        #print self.username
         self.password = self.request.get('password')
-        #print self.password
         self.verify = self.request.get('verify')
-        #print self.verify
         self.email = self.request.get('email')
-        #print self.email
 
         params = dict(username = self.username,
                       email = self.email)
@@ -431,14 +427,14 @@ class LoginPage(BaseHandler):
         username = self.request.get('username')
         password = self.request.get('password')
 
-        u = User.login(username, password)
+        user = User.login(username, password)
 
-        if u:
+        if user:
             usercookie = make_secure_val(str(username))
             print usercookie
             self.response.headers.add_header("Set-Cookie",
             "u=%s; Path=/" % usercookie)
-            self.login(u)
+            self.login(user)
             self.redirect('/')
         else:
             msg = "Login not valid"
@@ -467,7 +463,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
-                               ('/blog/newcomment', CreateComment),
+                               ('/blog/newcomment/([0-9]+)', CreateComment),
                                ('/blog/editcomment/([0-9]+)', EditComment),
                                ('/blog/deletecomment/([0-9]+)', DeleteComment),
                                ('/signup', SignUpPage),

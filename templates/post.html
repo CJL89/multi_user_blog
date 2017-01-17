@@ -16,7 +16,7 @@
     <div class="PostButtons">
       <a class= "btn btn-primary btn-default-md" href="/blog/editpost/{{p.key.id()}}">Add</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
-      <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{p.key.id()}}">Comment</a>
+      <a class= "btn btn-primary btn-default-md" href="/blog/newcomment/{{p.key.id()}}">Comment</a>
       {% for c in comments %}
       {% if c.author.name == user %}
       <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
