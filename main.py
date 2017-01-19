@@ -24,7 +24,7 @@ import random
 import models
 import time
 from string import letters
-from models import User, Post
+from models import User, Post, Comment
 
 from google.appengine.ext import ndb
 
@@ -227,27 +227,32 @@ class CreateComment(BaseHandler):
     """
     Create the comment into database
     """
-    def get(self):
+    def get(self, post_id):
         print "Inside CreateComment method"
         if self.user:
             self.render("editcomment.html")
         else:
             self.redirect('/')
 
-    def post(self):
+    def post(self, post_id):
         """
         Creates the new comment on single page
         """
+        print "Inside CreateComment - post"
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
+
+        if not post:
+            return self.redirect('/')
 
         content = self.request.get('comment')
-
         if content:
-            p = Comment(content = content, author = self.user)
-            p.put()
-            self.redirect('/')
-            self.redirect('/blog/%s' % str(p.key.integer_id()))
+            c = Comment(content = content, author = self.user)
+            print c
+            c.put()
+            self.redirect('/blog/%s' % str(post_id))
         else:
-            error = "enter valid content"
+            error = "enter valid comment"
             self.render("editcomment.html",content = content, error = error)
 
 class EditComment(BaseHandler):

@@ -69,10 +69,13 @@ class Post(ndb.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return main.render_str("post.html", p = self)
 
+    @property
+    def comments(self):
+        #comments = Comments.all.filter(post == self.key())
+        return comments
+
 # Blog - Comment Model
 class Comment(ndb.Model):
-    #comment_id = ndb.IntegrProperty(required = True)
-    subject = ndb.StringProperty(required=True)
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
     author = ndb.StructuredProperty(User)

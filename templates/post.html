@@ -18,6 +18,10 @@
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/newcomment/{{p.key.id()}}">Comment</a>
       {% for c in comments %}
+      <div class="">
+        {{c.content}}
+        {{c.author}}
+      </div>
       {% if c.author.name == user %}
       <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
