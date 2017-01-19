@@ -72,6 +72,7 @@ class Post(ndb.Model):
     @property
     def comments(self):
         #comments = Comments.all.filter(post == self.key())
+        comments = Comment.all.filter(post == self.key())
         return comments
 
 # Blog - Comment Model
