@@ -72,7 +72,8 @@ class Post(ndb.Model):
     @property
     def comments(self):
         #comments = Comments.all.filter(post == self.key())
-        comments = Comment.all.filter(post == self.key())
+        comments = Comment.query().filter(post == self.key())
+        print comments
         return comments
 
 # Blog - Comment Model
@@ -80,3 +81,7 @@ class Comment(ndb.Model):
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
     author = ndb.StructuredProperty(User)
+
+# # Blog - Like Model
+# class Like(ndb.Model):
+#     author = ndb.StructuredProperty(User)

@@ -24,7 +24,7 @@ import random
 import models
 import time
 from string import letters
-from models import User, Post, Comment
+from models import *
 
 from google.appengine.ext import ndb
 
@@ -318,6 +318,9 @@ class DeleteComment(BaseHandler):
             comment.key.delete()
             time.sleep(0.1)
         self.redirect('/')
+
+# # Like
+# class Like()
 
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
