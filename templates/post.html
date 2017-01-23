@@ -17,24 +17,18 @@
       <a class= "btn btn-primary btn-default-md" href="/blog/editpost/{{p.key.id()}}">Add</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/newcomment/{{p.key.id()}}">Comment</a>
-      {% for c in comments %}
-      <div class="">
+      {% for c in p.comments %}
+      <div id="commentarea">
         {{c.content}}
-        {{c.author}}
+        {{c.author.get().name}}
+        <!-- {% if c.author.name == user %} -->
+        <div id="commentButtons">
+          <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
+          <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
+        </div>
+        <!-- {% endif %} -->
       </div>
-      {% if c.author.name == user %}
-      <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
-      <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
-      {% endif %}
     {% endfor %}
     </div>
-    <!-- <div class="CommentButtons">
-      {% for c in comments %}
-        {% if c.author.name == self.user.name %}
-        <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">Add</a>
-        <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">Delete</a>
-        {% endif %}
-      {% endfor %}
-    </div> -->
   </div>
 </div>

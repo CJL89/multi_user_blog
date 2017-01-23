@@ -10,7 +10,6 @@ class User(ndb.Model):
     """
     Stores user information
     """
-    print "Inside User model class"
     name = ndb.StringProperty(required = True)
     pw_hash = ndb.StringProperty(required = True)
     email = ndb.StringProperty()
@@ -63,7 +62,7 @@ class Post(ndb.Model):
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
     last_modified = ndb.DateTimeProperty(auto_now=True)
-    author = ndb.StructuredProperty(User)
+    author = ndb.KeyProperty(kind = 'User')
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -71,17 +70,22 @@ class Post(ndb.Model):
 
     @property
     def comments(self):
+        print "Inside @property comments method"
         #comments = Comments.all.filter(post == self.key())
-        comments = Comment.query().filter(post == self.key())
+        comments = Comment.query().filter(Comment.post == self.key)
         print comments
         return comments
 
 # Blog - Comment Model
 class Comment(ndb.Model):
+    """
+    Attributes for comments datastore
+    """
+    post = ndb.KeyProperty(kind = 'Post')
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
-    author = ndb.StructuredProperty(User)
+    author = ndb.KeyProperty(kind = 'User')
 
-# # Blog - Like Model
+# Blog - Like Model
 # class Like(ndb.Model):
 #     author = ndb.StructuredProperty(User)

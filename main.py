@@ -24,7 +24,7 @@ import random
 import models
 import time
 from string import letters
-from models import *
+from models import User, Post, Comment
 
 from google.appengine.ext import ndb
 
@@ -152,7 +152,7 @@ class NewPostPage(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = models.blog_key(), subject = subject, content = content, author = self.user)
+            p = Post(parent = models.blog_key(), subject = subject, content = content, author = self.user.key)
             p.put()
             self.redirect('/')
             self.redirect('/blog/%s' % str(p.key.integer_id()))
@@ -168,7 +168,7 @@ class EditPost(BaseHandler):
         post = key.get()
 
         if self.user:
-            if post.author.name != self.user.name:
+            if post.author.id() != self.user.key.id():
                 self.redirect('/blog/%s' %str(post.key().id()))
             else:
                 self.render("editpost.html", subject = post.subject, content = post.content)
@@ -217,7 +217,7 @@ class DeletePost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
-        if post and post.author.name == self.user.name:
+        if post and (post.author.id() == self.user.key.id()):
             post.key.delete()
             time.sleep(0.1)
         self.redirect('/')
@@ -247,8 +247,7 @@ class CreateComment(BaseHandler):
 
         content = self.request.get('comment')
         if content:
-            c = Comment(content = content, author = self.user)
-            print c
+            c = Comment(post = post.key, content = content, author = self.user.key)
             c.put()
             self.redirect('/blog/%s' % str(post_id))
         else:
@@ -261,9 +260,7 @@ class EditComment(BaseHandler):
         Renders comments to home page
         """
         print "Inside EditComment Method"
-
         key = ndb.Key('Comment', int(post_id))
-        print key
         comment = key.get()
         if not comment:
             self.error(404)
