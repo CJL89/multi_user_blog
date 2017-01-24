@@ -232,7 +232,7 @@ class CreateComment(BaseHandler):
         if self.user:
             self.render("editcomment.html")
         else:
-            self.redirect('/')
+            self.redirect('/login')
 
     def post(self, post_id):
         """
@@ -249,6 +249,7 @@ class CreateComment(BaseHandler):
         if content:
             c = Comment(post = post.key, content = content, author = self.user.key)
             c.put()
+            time.sleep(0.1)
             self.redirect('/blog/%s' % str(post_id))
         else:
             error = "enter valid comment"
@@ -267,7 +268,7 @@ class EditComment(BaseHandler):
             return
         print self.user
         if self.user:
-            self.render("editcomment.html", content = comment.content, post_id = comment.comment_id)
+            self.render("editcomment.html", content = comment.content)
         else:
             self.redirect("/login")
 
@@ -275,18 +276,21 @@ class EditComment(BaseHandler):
         """
         """
         key = ndb.Key('Comment', int(post_id))
-        comment = key.get()
+        post = key.get()
         if not self.user:
             return self.redirect("/login")
-            print comment.author.username
-            if comment and comment.author.username == self.user.name:
-                content = self.request.get("comment")
-                comment.content = content
-                comment.put()
-                self.redirect("/blog/%s" %comment.comment_id)
-            else:
-                msg = "Enter your comment"
-                self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = msg)
+
+        content = self.request.get('comment')
+
+        if content and comment.author.id() == self.user.key.id():
+            comment = Comment(post_key = post, content = content, author = self.user.key)
+            comment = key.get()
+            comment.put()
+            time.sleep(0.1)
+            self.redirect("/blog/%s" %str(post_id))
+        else:
+            msg = "Enter your comment"
+            self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = msg)
 
 
 # #Delete Comment
@@ -300,7 +304,7 @@ class DeleteComment(BaseHandler):
             return
 
         if self.user:
-            self.render("deletecomment.html",post_id = comment.post_id)
+            self.render("deletecomment.html",author = self.user.key)
         else:
             self.redirect("/login")
 
@@ -311,7 +315,7 @@ class DeleteComment(BaseHandler):
         key = ndb.Key('Comment', int(post_id))
         comment = key.get()
 
-        if comment and comment.author.username == self.user.name:
+        if comment and comment.author.id() == self.user.key.id():
             comment.key.delete()
             time.sleep(0.1)
         self.redirect('/')

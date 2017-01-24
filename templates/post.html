@@ -20,13 +20,15 @@
       {% for c in p.comments %}
       <div id="commentarea">
         {{c.content}}
-        {{c.author.get().name}}
-        {% if c.author.name == user %}
+        {% set commentAuthor = (c.author.get()).name %}
+        {% if commentAuthor %}
         <div id="commentButtons">
           <a class= "btn btn-primary btn-default-md" href="/blog/editcomment/{{c.key.id()}}">AddComment</a>
           <a class= "btn btn-primary btn-default-md" href="/blog/deletecomment/{{c.key.id()}}">DeleteComment</a>
         </div>
         {% endif %}
+
+
       </div>
     {% endfor %}
     </div>
