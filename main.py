@@ -261,12 +261,13 @@ class EditComment(BaseHandler):
         Renders comments to home page
         """
         print "Inside EditComment Method"
+
         key = ndb.Key('Comment', int(post_id))
         comment = key.get()
+
         if not comment:
             self.error(404)
             return
-        print self.user
         if self.user:
             self.render("editcomment.html", content = comment.content)
         else:
@@ -275,17 +276,19 @@ class EditComment(BaseHandler):
     def post(self, post_id):
         """
         """
+        print "Inside EditComment - Post Handler"
+        content = self.request.get('comment')
         key = ndb.Key('Comment', int(post_id))
-        post = key.get()
+        comment = key.get()
+
         if not self.user:
             return self.redirect("/login")
 
-        content = self.request.get('comment')
-
-        if content and comment.author.id() == self.user.key.id():
-            comment = Comment(post_key = post, content = content, author = self.user.key)
-            comment = key.get()
-            comment.put()
+        
+        if content:
+            c = Comment(comment = comment.key,content = content, author = self.user.key)
+            c = key.get()
+            c.put()
             time.sleep(0.1)
             self.redirect("/blog/%s" %str(post_id))
         else:
@@ -296,7 +299,10 @@ class EditComment(BaseHandler):
 # #Delete Comment
 class DeleteComment(BaseHandler):
     def get(self, post_id):
-        comment_id = self.request.get('post_text')
+
+        print "Inside DeleteComment Handler"
+
+        comment_id = self.request.get('comment')
         key = ndb.Key('Comment', int(post_id))
         comment = key.get()
         if not comment:

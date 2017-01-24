@@ -70,10 +70,7 @@ class Post(ndb.Model):
 
     @property
     def comments(self):
-        print "Inside @property comments method"
-        #comments = Comments.all.filter(post == self.key())
         comments = Comment.query().filter(Comment.post == self.key)
-        print comments
         return comments
 
 # Blog - Comment Model
