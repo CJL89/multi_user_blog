@@ -286,7 +286,7 @@ class EditComment(BaseHandler):
         print content
 
         if comment.author.id() == self.user.key.id():
-            c = Comment(comment = comment.key,content = content, author = self.user.key)
+            c = Comment(post = comment.key ,content = content, author = self.user.key)
             c = key.get()
             content = content
             c.put()
