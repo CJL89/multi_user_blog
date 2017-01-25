@@ -228,7 +228,6 @@ class CreateComment(BaseHandler):
     Create the comment into database
     """
     def get(self, post_id):
-        print "Inside CreateComment method"
         if self.user:
             self.render("editcomment.html")
         else:
@@ -238,7 +237,6 @@ class CreateComment(BaseHandler):
         """
         Creates the new comment on single page
         """
-        print "Inside CreateComment - post"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
@@ -277,23 +275,26 @@ class EditComment(BaseHandler):
         """
         """
         print "Inside EditComment - Post Handler"
-        content = self.request.get('comment')
+
         key = ndb.Key('Comment', int(post_id))
         comment = key.get()
 
         if not self.user:
             return self.redirect("/login")
 
-        
-        if content:
+        content = self.request.get('comment')
+        print content
+
+        if comment and comment.author.id == self.user.key.id():
             c = Comment(comment = comment.key,content = content, author = self.user.key)
             c = key.get()
+            comment.content = content
             c.put()
             time.sleep(0.1)
             self.redirect("/blog/%s" %str(post_id))
         else:
             msg = "Enter your comment"
-            self.render("editcomment.html", content = comment.content, post_id = comment.comment_id, error = msg)
+            self.render("editcomment.html", content = comment.content, post = post_id, error = msg)
 
 
 # #Delete Comment
