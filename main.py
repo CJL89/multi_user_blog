@@ -285,10 +285,10 @@ class EditComment(BaseHandler):
         content = self.request.get('comment')
         print content
 
-        if comment and comment.author.id == self.user.key.id():
+        if comment.author.id() == self.user.key.id():
             c = Comment(comment = comment.key,content = content, author = self.user.key)
             c = key.get()
-            comment.content = content
+            content = content
             c.put()
             time.sleep(0.1)
             self.redirect("/blog/%s" %str(post_id))
