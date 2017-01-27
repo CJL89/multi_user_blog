@@ -174,7 +174,7 @@ class EditPost(BaseHandler):
                 self.render("editpost.html", subject = post.subject, content = post.content)
         else:
             error = 'You must login to view the post'
-            self.redirect("/login")
+            self.render('login.html', error = error)
 
     def post(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
@@ -207,7 +207,8 @@ class DeletePost(BaseHandler):
         if self.user:
             self.render('deletepost.html', post = post)
         else:
-            self.redirect('/login')
+            error = "In order to delete post, please login into the site"
+            self.render('login.html', error = error)
 
     def post(self, post_id):
         if not self.user:
@@ -328,8 +329,31 @@ class DeleteComment(BaseHandler):
             time.sleep(0.1)
         self.redirect('/')
 
-# # Like
- # class Like()
+# Like
+class Like(BaseHandler):
+    def get(self, post_id):
+         key = ndb.Key('Like', int(post_id))
+         post = key.get()
+
+         if not post:
+             self.error(404)
+             return
+
+    def post(self, post_id):
+        """
+        Update the like record and rendered the number.
+        """
+         key = ndb.Key('Like', int(post_id))
+         post = key.get()
+         num_of_likes = 0
+
+         if(Like.author.id() == self.user.key.id()):
+             error = "Can't Like your own post"
+             self.redirect('/')
+         else:
+             num_of_likes += 1
+             post.put()
+
 
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -462,19 +486,7 @@ class LogoutPage(BaseHandler):
         self.logout()
         self.redirect('/')
 
-# class WelcomePage(BaseHandler):
-#     def get(self):
-#         print "Inside WelcomePage function"
-#         username = self.request.get('username')
-#         print username
-#         if self.user:
-#             self.render('welcome.html', username = username)
-#         else:
-#             self.redirect('/login')
-
-
 app = webapp2.WSGIApplication([('/', MainPage),
-                            #    ('/welcome', WelcomePage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/editpost/([0-9]+)', EditPost),

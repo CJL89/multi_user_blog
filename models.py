@@ -63,6 +63,7 @@ class Post(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     last_modified = ndb.DateTimeProperty(auto_now=True)
     author = ndb.KeyProperty(kind = 'User')
+    likes = ndb.KeyProperty(repeated= True)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -72,6 +73,14 @@ class Post(ndb.Model):
     def comments(self):
         comments = Comment.query().filter(Comment.post == self.key)
         return comments
+        
+    @property
+    def likes(self):
+     """
+     Return Like from matching post and self key
+     """
+     likes = Like.query.filter(Like.post == self.key)
+     return like
 
 # Blog - Comment Model
 class Comment(ndb.Model):
@@ -83,6 +92,7 @@ class Comment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     author = ndb.KeyProperty(kind = 'User')
 
-# Blog - Like Model
-# class Like(ndb.Model):
-#     author = ndb.StructuredProperty(User)
+ # Blog - Like Model
+class Like(ndb.Model):
+     author = ndb.KeyProperty(kind = 'User')
+     post = ndb.KeyProperty(kind = 'Post')
