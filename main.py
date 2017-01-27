@@ -186,11 +186,9 @@ class EditPost(BaseHandler):
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = models.blog_key(), subject = post.subject, content = post.content)
-            p = key.get()
             post.subject = subject
             post.content = content
-            p.put()
+            post.put()
             time.sleep(0.1)
             self.redirect('/')
         else:
@@ -254,13 +252,13 @@ class CreateComment(BaseHandler):
             self.render("editcomment.html",content = content, error = error)
 
 class EditComment(BaseHandler):
-    def get(self, post_id):
+    def get(self, comment_id):
         """
         Renders comments to home page
         """
         print "Inside EditComment Method"
 
-        key = ndb.Key('Comment', int(post_id))
+        key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
         if not comment:
@@ -271,12 +269,12 @@ class EditComment(BaseHandler):
         else:
             self.redirect("/login")
 
-    def post(self, post_id):
+    def post(self, comment_id):
         """
         """
         print "Inside EditComment - Post Handler"
 
-        key = ndb.Key('Comment', int(post_id))
+        key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
         if not self.user:
@@ -284,28 +282,31 @@ class EditComment(BaseHandler):
 
         content = self.request.get('comment')
         print content
-
-        if comment.author.id() == self.user.key.id():
-            c = Comment(post = comment.key ,content = content, author = self.user.key)
-            c = key.get()
-            content = content
-            c.put()
-            time.sleep(0.1)
-            self.redirect("/blog/%s" %str(post_id))
+        if content:
+            if comment.author.id() == self.user.key.id():
+                comment.content = content
+                comment.put()
+                time.sleep(0.1)
+                self.redirect("/blog/%s" %str(comment.post.id()))
+            else:
+                msg = "You are not the owner of this comment"
+                self.render("editcomment.html", content = comment.content, error = msg)
         else:
-            msg = "Enter your comment"
-            self.render("editcomment.html", content = comment.content, post = post_id, error = msg)
+            msg = "Valid Comment please"
+            self.render("editcomment.html", content = comment.content, error = msg)
 
 
 # #Delete Comment
 class DeleteComment(BaseHandler):
-    def get(self, post_id):
+    def get(self, comment_id):
 
         print "Inside DeleteComment Handler"
 
-        comment_id = self.request.get('comment')
-        key = ndb.Key('Comment', int(post_id))
+        content = self.request.get('comment')
+
+        key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
+
         if not comment:
             self.error(404)
             return
@@ -315,11 +316,11 @@ class DeleteComment(BaseHandler):
         else:
             self.redirect("/login")
 
-    def post(self, post_id):
+    def post(self, comment_id):
         if not self.user:
             return self.redirect("/login")
 
-        key = ndb.Key('Comment', int(post_id))
+        key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
         if comment and comment.author.id() == self.user.key.id():
@@ -328,7 +329,7 @@ class DeleteComment(BaseHandler):
         self.redirect('/')
 
 # # Like
-# class Like()
+ # class Like()
 
 # Validation for Username, password, and email
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -367,7 +368,6 @@ class SignUpPage(BaseHandler):
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
-            print error_username
             signup_error = True
             print "User name not valid"
 
