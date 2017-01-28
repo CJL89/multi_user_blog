@@ -347,6 +347,8 @@ class Like(BaseHandler):
          post = key.get()
          num_of_likes = 0
 
+         like = self.request.get
+
          if(Like.author.id() == self.user.key.id()):
              error = "Can't Like your own post"
              self.redirect('/')
@@ -471,7 +473,6 @@ class LoginPage(BaseHandler):
 
         if user:
             usercookie = make_secure_val(str(username))
-            print usercookie
             self.response.headers.add_header("Set-Cookie",
             "u=%s; Path=/" % usercookie)
             self.login(user)
