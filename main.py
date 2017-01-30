@@ -122,7 +122,6 @@ class PostPage(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent= models.blog_key())
         post = key.get()
 
-
         if not post:
             self.error(404)
             return
@@ -180,7 +179,7 @@ class EditPost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
-        uid = self.read_secure_cookie('user_id')
+        userid = self.read_secure_cookie('user_id')
 
         subject = self.request.get('subject')
         content = self.request.get('post_text')
@@ -330,34 +329,49 @@ class DeleteComment(BaseHandler):
         self.redirect('/')
 
 # Like
-# class Like(BaseHandler):
-#     def get(self, post_id):
-#         key = ndb.Key('Like', int(post_id))
-#         post = key.get()
-#
-#         if not post:
-#              self.error(404)
-#              return
-#
-#     def post(self, post_id):
-#         """
-#         Update the like record and rendered the number.
-#         """
-#          key = ndb.Key('Like', int(post_id))
-#          post = key.get()
-#          num_of_likes = 0
-#
-#          like = self.request.get
-#
-#          if(Like.author.id() == self.user.key.id()):
-#              error = "Can't Like your own post"
-#              self.redirect('/')
-#          else:
-#              num_of_likes += 1
-#              post.put()
+class LikePost(BaseHandler):
+    def get(self, post_id):
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
+
+        if not post:
+            self.error(404)
+            return
+
+    def post(self, post_id):
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
+
+        if not self.user:
+            self.redirect('/login')
+
+        if self.user and post.author.id() == self.user.key.id():
+            self.write("You can not like your own post")
+        else:
+            like = Like(post = post.key, author = self.user.key.id())
+            like.put()
+            self.redirect('/')
+#Unlike Post
+class UnlikePost(BaseHandler):
+    def get(self, post_id):
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
+
+        if not post:
+            self.error(404)
+            return
+
+    def post(self, post_id):
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        like = key.get()
+
+        if self.user and post.author.id() == self.user.key.id():
+            like.key.delete()
+            time.sleep(0.1)
 
 
-# Validation for Username, password, and email
+
+# Validation for Username, and password
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and USER_RE.match(username)
@@ -365,10 +379,6 @@ def valid_username(username):
 PASS_RE = re.compile(r"^.{3,20}$")
 def valid_password(password):
     return password and PASS_RE.match(password)
-
-EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-def valid_email(email):
-    return not email or EMAIL_RE.match(email)
 
 #SignUp, Registration, Login, and Logout for User
 
@@ -390,14 +400,9 @@ class SignUpPage(BaseHandler):
         params = dict(username = self.username,
                       email = self.email)
 
-        print "Checking username validity"
-
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
             signup_error = True
-            print "User name not valid"
-
-        print "Checking password validity"
 
         if not valid_password(self.password):
             params['error_password'] = "Password not valid"
@@ -490,7 +495,7 @@ class LogoutPage(BaseHandler):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
-                            #    ('/blog/([0-9]+)', Like)
+                               ('/blog/like/([0-9]+)', LikePost),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),
