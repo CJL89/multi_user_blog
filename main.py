@@ -330,31 +330,31 @@ class DeleteComment(BaseHandler):
         self.redirect('/')
 
 # Like
-class Like(BaseHandler):
-    def get(self, post_id):
-         key = ndb.Key('Like', int(post_id))
-         post = key.get()
-
-         if not post:
-             self.error(404)
-             return
-
-    def post(self, post_id):
-        """
-        Update the like record and rendered the number.
-        """
-         key = ndb.Key('Like', int(post_id))
-         post = key.get()
-         num_of_likes = 0
-
-         like = self.request.get
-
-         if(Like.author.id() == self.user.key.id()):
-             error = "Can't Like your own post"
-             self.redirect('/')
-         else:
-             num_of_likes += 1
-             post.put()
+# class Like(BaseHandler):
+#     def get(self, post_id):
+#         key = ndb.Key('Like', int(post_id))
+#         post = key.get()
+#
+#         if not post:
+#              self.error(404)
+#              return
+#
+#     def post(self, post_id):
+#         """
+#         Update the like record and rendered the number.
+#         """
+#          key = ndb.Key('Like', int(post_id))
+#          post = key.get()
+#          num_of_likes = 0
+#
+#          like = self.request.get
+#
+#          if(Like.author.id() == self.user.key.id()):
+#              error = "Can't Like your own post"
+#              self.redirect('/')
+#          else:
+#              num_of_likes += 1
+#              post.put()
 
 
 # Validation for Username, password, and email
@@ -490,6 +490,7 @@ class LogoutPage(BaseHandler):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
+                            #    ('/blog/([0-9]+)', Like)
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),

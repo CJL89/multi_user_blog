@@ -73,13 +73,13 @@ class Post(ndb.Model):
     def comments(self):
         comments = Comment.query().filter(Comment.post == self.key)
         return comments
-        
+
     @property
     def likes(self):
      """
      Return Like from matching post and self key
      """
-     likes = Like.query.filter(Like.post == self.key)
+     likes = Like.query().filter(Like.post == self.key)
      return like
 
 # Blog - Comment Model
@@ -93,6 +93,6 @@ class Comment(ndb.Model):
     author = ndb.KeyProperty(kind = 'User')
 
  # Blog - Like Model
-class Like(ndb.Model):
-     author = ndb.KeyProperty(kind = 'User')
-     post = ndb.KeyProperty(kind = 'Post')
+# class Like(ndb.Model):
+#      author = ndb.KeyProperty(kind = 'User')
+#      post = ndb.KeyProperty(kind = 'Post')

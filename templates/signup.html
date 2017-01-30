@@ -12,10 +12,10 @@
       <div class="user_div">
         <input type="form-control" name="username" value="{{username}}">
       </div>
-      {% if error_username %}
+      {% if error %}
       <div class="alert alert-danger">
         <span class = "glyphicon glyphicon-alert" aria-hidden= "true"></span>
-        {{error}}
+        {{error_username}}
       </div>
       {% endif %}
     </div>
