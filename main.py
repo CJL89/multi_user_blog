@@ -300,8 +300,6 @@ class EditComment(BaseHandler):
 class DeleteComment(BaseHandler):
     def get(self, comment_id):
 
-        print "Inside DeleteComment Handler"
-
         content = self.request.get('comment')
 
         key = ndb.Key('Comment', int(comment_id))
@@ -334,11 +332,14 @@ class LikePost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
+        userid = self.read_secure_cookie('user_id')
+
         if not post:
             self.error(404)
             return
 
     def post(self, post_id):
+        print "Inside LikePost- post"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
@@ -350,7 +351,9 @@ class LikePost(BaseHandler):
         else:
             like = Like(post = post.key, author = self.user.key.id())
             like.put()
+            post.likes = like.put()
             self.redirect('/')
+
 #Unlike Post
 class UnlikePost(BaseHandler):
     def get(self, post_id):
@@ -496,6 +499,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
                                ('/blog/like/([0-9]+)', LikePost),
+                               ('/blog/unlike/([0-9]+)', UnlikePost),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),
