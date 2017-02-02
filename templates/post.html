@@ -17,10 +17,7 @@
       <a class= "btn btn-primary btn-default-md" href="/blog/editpost/{{p.key.id()}}">Add</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/deletepost/{{p.key.id()}}">Delete</a>
       <a class= "btn btn-primary btn-default-md" href="/blog/newcomment/{{p.key.id()}}">Comment</a>
-      <form method="post">
-        <button type="submit" class= "btn btn-primary btn-default-md" name="Like" id = "like">Like</button>
-      </form>
-      <!-- <a class= "btn btn-primary btn-default-md" href="/blog/like/{{p.key.id()}}">Like</a> -->
+      <a class= "btn btn-primary btn-default-md" href="/blog/like/{{p.key.id()}}">Like</a>
       {% for c in p.comments %}
       <div id="commentarea">
         {{c.content}}

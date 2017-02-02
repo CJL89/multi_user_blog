@@ -137,22 +137,7 @@ class PostPage(BaseHandler):
         if not post:
             self.error(404)
             return
-        if self.request.get("like"):
-            likes = len(post.likes)
-            if likes:
-                self.render("post.html", post = posts, like = likes)
-            else:
-                self.redirect('/')
-
-            if self.user and post.author.id() == self.user.key.id():
-                self.write("You can not like your own post")
-            else:
-                like = Like(post = post.key, author = self.user.key.id())
-                like.put()
-                post.likes = like.put()
-                self.redirect('/')
-        else:
-            self.render("post.html", posts = posts)
+        self.render("post.html", posts = posts)
 
 class NewPostPage(BaseHandler):
     def get(self):
@@ -367,16 +352,16 @@ class LikePost(BaseHandler):
         else:
             like = Like(post = post.key, author = self.user.key.id())
             like.put()
-            post.likes = like.put()
+            post.put()
             self.redirect('/')
 
-    def post(self, post_id):
-        print "Inside LikePost- post"
-        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
-        post = key.get()
-
-        if not self.user:
-            self.redirect('/login')
+    # def post(self, post_id):
+    #     print "Inside LikePost- post"
+    #     key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+    #     post = key.get()
+    #
+    #     if not self.user:
+    #         self.redirect('/login')
 
         # if self.user and post.author.id() == self.user.key.id():
         #     self.write("You can not like your own post")
@@ -530,7 +515,7 @@ class LogoutPage(BaseHandler):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPostPage),
-                            #    ('/blog/like/([0-9]+)', LikePost),
+                               ('/blog/like/([0-9]+)', LikePost),
                                ('/blog/unlike/([0-9]+)', UnlikePost),
                                ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
