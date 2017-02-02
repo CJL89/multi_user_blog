@@ -329,6 +329,7 @@ class DeleteComment(BaseHandler):
 # Like
 class LikePost(BaseHandler):
     def get(self, post_id):
+        print "Inside LikePost- get"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
@@ -337,6 +338,13 @@ class LikePost(BaseHandler):
         if not post:
             self.error(404)
             return
+
+        likes = len(post.likes)
+
+        if likes:
+            self.render("post.html", like = likes)
+        else:
+            self.redirect('/')
 
     def post(self, post_id):
         print "Inside LikePost- post"
