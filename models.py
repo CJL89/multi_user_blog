@@ -94,7 +94,7 @@ class Comment(ndb.Model):
 
  # Blog - Like Model
 class Like(ndb.Model):
-    #  author = ndb.KeyProperty(kind = 'User')
-     users = ndb.KeyProperty(kind = 'User', repeated = True)
+     author = ndb.KeyProperty(kind = 'User')
+    # users = ndb.KeyProperty(kind = 'User', repeated = True)
      post = ndb.KeyProperty(kind = 'Post')
      like_count = ndb.IntegerProperty()
