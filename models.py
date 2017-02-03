@@ -63,7 +63,7 @@ class Post(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     last_modified = ndb.DateTimeProperty(auto_now=True)
     author = ndb.KeyProperty(kind = 'User')
-    likes = ndb.KeyProperty(kind ='Like', repeated = True)
+    likes = ndb.KeyProperty(kind ='Like')
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -94,5 +94,7 @@ class Comment(ndb.Model):
 
  # Blog - Like Model
 class Like(ndb.Model):
-     author = ndb.KeyProperty(kind = 'User')
+    #  author = ndb.KeyProperty(kind = 'User')
+     users = ndb.KeyProperty(kind = 'User', repeated = True)
      post = ndb.KeyProperty(kind = 'Post')
+     like_count = ndb.IntegerProperty()

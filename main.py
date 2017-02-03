@@ -253,9 +253,6 @@ class CreateComment(BaseHandler):
 
 class EditComment(BaseHandler):
     def get(self, comment_id):
-        """
-        Renders comments to home page
-        """
         print "Inside EditComment Method"
 
         key = ndb.Key('Comment', int(comment_id))
@@ -270,10 +267,6 @@ class EditComment(BaseHandler):
             self.redirect("/login")
 
     def post(self, comment_id):
-        """
-        """
-        print "Inside EditComment - Post Handler"
-
         key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
@@ -281,7 +274,6 @@ class EditComment(BaseHandler):
             return self.redirect("/login")
 
         content = self.request.get('comment')
-        print content
         if content:
             if comment.author.id() == self.user.key.id():
                 comment.content = content
