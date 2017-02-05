@@ -1,4 +1,4 @@
-{% extends "default.html" %}
+{% extends "default.html"%}
 
 {% block content%}
 <div class="row">
@@ -17,7 +17,7 @@
           <textarea class ="content" name="post_text">{{content}}</textarea>
         </div>
         <button type="submit" class= "btn btn-primary btn-default-lg"name="submit" >Submit</button>
-        <button type= "back" class= "btn btn-primary btn-default-lg" name="back" >Cancel</button>
+        <button type= "back" class= "btn btn-primary btn-default-lg" name="back" href = "/">Cancel</button>
     </form>
   </div>
   {% if error %}

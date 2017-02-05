@@ -24,7 +24,7 @@ import random
 import models
 import time
 from string import letters
-from models import User, Post, Comment
+from models import User, Post, Comment, Like
 
 from google.appengine.ext import ndb
 
@@ -121,6 +121,9 @@ class PostPage(BaseHandler):
         """
         key = ndb.Key('Post', int(post_id), parent= models.blog_key())
         post = key.get()
+        like_obj = Like.query(Like.post == post.key)
+
+
 
         if not post:
             self.error(404)
@@ -168,7 +171,7 @@ class EditPost(BaseHandler):
 
         if self.user:
             if post.author.id() != self.user.key.id():
-                self.redirect('/blog/%s' %str(post.key().id()))
+                self.redirect('/blog/%s' %str(post.key.id()))
             else:
                 self.render("editpost.html", subject = post.subject, content = post.content)
         else:
@@ -332,36 +335,46 @@ class LikePost(BaseHandler):
             self.error(404)
             return
 
-        likes = len(post.likes)
-
-        if likes:
-            self.render("post.html", like = likes)
-        else:
+        if not self.user:
             self.redirect('/')
 
-        if self.user and post.author.id() == self.user.key.id():
+        #likes = len(post.likes)
+        like_obj = Like.query(Like.post == post.key).get()
+
+        if post.author == self.user.key:
             self.write("You can not like your own post")
         else:
-            like = Like(post = post.key, author = self.user.key.id())
-            like.put()
-            post.put()
-            self.redirect('/')
+            if like_obj:
+                authors = like_obj.author
+                for author in authors:
+                    if(author == self.user.key):
+                        self.redirect("/blog/%s" % str(post.key.id))
+                like_obj.like_count += 1
+                authors.append(self.user.key)
+                like_obj.put()
+                self.redirect('/')
+            else:
+                like_obj = Like(post = post.key, like_count = 1)
+                like_obj.author.append(self.user.key)
+                like_obj.put()
+                self.redirect('/')
 
-    # def post(self, post_id):
-    #     print "Inside LikePost- post"
-    #     key = ndb.Key('Post', int(post_id), parent=models.blog_key())
-    #     post = key.get()
-    #
-    #     if not self.user:
-    #         self.redirect('/login')
+
+
+        # if likes:
+        #     self.render("post.html", like = likes)
+        # else:
+        #     self.redirect('/')
 
         # if self.user and post.author.id() == self.user.key.id():
         #     self.write("You can not like your own post")
         # else:
         #     like = Like(post = post.key, author = self.user.key.id())
         #     like.put()
-        #     post.likes = like.put()
+        #     post.put()
         #     self.redirect('/')
+
+
 
 #Unlike Post
 class UnlikePost(BaseHandler):
@@ -373,13 +386,21 @@ class UnlikePost(BaseHandler):
             self.error(404)
             return
 
-    def post(self, post_id):
-        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
-        like = key.get()
+        like_obj = Like.query(Like.post == post.key).get()
 
-        if self.user and post.author.id() == self.user.key.id():
-            like.key.delete()
-            time.sleep(0.1)
+        if like_obj:
+            authors = like_obj.author
+            for author in authors:
+                if author == self.user.key:
+                    like_obj.author.remove(author)
+                    flag = True
+                    if not flag:
+                        self.redirect('/blog/%s' %str(post.key.id()))
+                    else:
+                        self.write("user doesn't exist")
+        else:
+            self.write("No Like object")
+
 
 
 
