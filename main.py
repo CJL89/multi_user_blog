@@ -312,7 +312,7 @@ class DeleteComment(BaseHandler):
             return
 
         if self.user:
-            self.render("deletecomment.html",author=self.user.key)
+            self.render("deletecomment.html", author=self.user.key)
         else:
             self.redirect("/login")
 
@@ -327,6 +327,7 @@ class DeleteComment(BaseHandler):
             comment.key.delete()
             time.sleep(0.1)
         self.redirect('/')
+
 
 # Like
 class LikePost(BaseHandler):
@@ -345,7 +346,6 @@ class LikePost(BaseHandler):
         if not self.user:
             self.redirect('/')
 
-        #likes = len(post.likes)
         like_obj = Like.query(Like.post == post.key).get()
 
         if post.author == self.user.key:
@@ -361,11 +361,10 @@ class LikePost(BaseHandler):
                 like_obj.put()
                 self.redirect('/')
             else:
-                like_obj = Like(post = post.key, like_count = 1)
+                like_obj = Like(post=post.key, like_count=1)
                 like_obj.author.append(self.user.key)
                 like_obj.put()
                 self.redirect('/')
-
 
 
 # Unlike Post
@@ -387,25 +386,27 @@ class UnlikePost(BaseHandler):
                     like_obj.author.remove(author)
                     flag = True
                     if not flag:
-                        self.redirect('/blog/%s' %str(post.key.id()))
+                        self.redirect('/blog/%s' % str(post.key.id()))
                     else:
                         self.write("user doesn't exist")
         else:
             self.write("No Like object")
 
-
-
-
 # Validation for Username, and password
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+
+
 def valid_username(username):
     return username and USER_RE.match(username)
 
 PASS_RE = re.compile(r"^.{3,20}$")
+
+
 def valid_password(password):
     return password and PASS_RE.match(password)
 
-#SignUp, Registration, Login, and Logout for User
+# SignUp, Registration, Login, and Logout for User
+
 
 class SignUpPage(BaseHandler):
     """
@@ -422,8 +423,8 @@ class SignUpPage(BaseHandler):
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
 
-        params = dict(username = self.username,
-                      email = self.email)
+        params = dict(username=self.username,
+                      email=self.email)
 
         if not valid_username(self.username):
             params['error_username'] = "Invalid Username"
@@ -437,7 +438,6 @@ class SignUpPage(BaseHandler):
             params['error_verify'] = "Your passwords didn't match."
             signup_error = True
 
-
         if signup_error:
             self.render('signup.html', **params)
         else:
@@ -447,24 +447,22 @@ class SignUpPage(BaseHandler):
         """
         Make sure user exists
         """
-        print "In done function"
         u = User.by_name(self.username)
-        print u
         if u:
             msg = "User name exists"
-            self.render('signup.html', error_username = msg)
+            self.render('signup.html', error_username=msg)
         else:
             u = User.register(self.username, self.password, self.email)
             key = u.put()
             usercookie = make_secure_val(str(self.username))
             self.response.headers.add_header("Set-Cookie",
-            "u=%s; Path=/" % usercookie)
+                                             "u=%s; Path=/" % usercookie)
             self.login(u)
             self.redirect('/')
 
 
 # User stuff
-def make_salt(length = 5):
+def make_salt(length=5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
 
@@ -472,18 +470,21 @@ def make_pw_hash(name, pw, salt=None):
     if not salt:
         salt = make_salt()
     h = hashlib.sha256(name + pw + salt).hexdigest()
-    return '%s,%s' %(salt, h)
+    return '%s,%s' % (salt, h)
 
 
 def valid_pw(name, pw, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
 
+
 def make_secure_val(val):
     """
     Creates the secure value using a secret.
     """
-    return '%s|%s' %(val, hmac.new(secret, val).hexdigest())
+    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+
+
 def check_secure_val(secure_val):
     """
     Verification of the secure value against the secret
@@ -493,7 +494,7 @@ def check_secure_val(secure_val):
         return val
 
 
-#Login class
+# Login class
 class LoginPage(BaseHandler):
     def get(self):
         self.render("login.html")
@@ -507,7 +508,7 @@ class LoginPage(BaseHandler):
         if user:
             usercookie = make_secure_val(str(username))
             self.response.headers.add_header("Set-Cookie",
-            "u=%s; Path=/" % usercookie)
+                                             "u=%s; Path=/" % usercookie)
             self.login(user)
             self.redirect('/')
         else:
@@ -522,17 +523,17 @@ class LogoutPage(BaseHandler):
         self.logout()
         self.redirect('/')
 
-app=webapp2.WSGIApplication([('/', MainPage),
-                             ('/blog/([0-9]+)', PostPage),
-                             ('/blog/newpost', NewPostPage),
-                             ('/blog/like/([0-9]+)', LikePost),
-                             ('/blog/unlike/([0-9]+)', UnlikePost),
-                             ('/blog/editpost/([0-9]+)', EditPost),
-                             ('/blog/deletepost/([0-9]+)', DeletePost),
-                             ('/blog/newcomment/([0-9]+)', CreateComment),
-                             ('/blog/editcomment/([0-9]+)', EditComment),
-                             ('/blog/deletecomment/([0-9]+)', DeleteComment),
-                             ('/signup', SignUpPage),
-                             ('/login', LoginPage),
-                             ('/logout', LogoutPage)
-                             ], debug=True)
+app = webapp2.WSGIApplication([('/', MainPage),
+                              ('/blog/([0-9]+)', PostPage),
+                              ('/blog/newpost', NewPostPage),
+                              ('/blog/like/([0-9]+)', LikePost),
+                              ('/blog/unlike/([0-9]+)', UnlikePost),
+                              ('/blog/editpost/([0-9]+)', EditPost),
+                              ('/blog/deletepost/([0-9]+)', DeletePost),
+                              ('/blog/newcomment/([0-9]+)', CreateComment),
+                              ('/blog/editcomment/([0-9]+)', EditComment),
+                              ('/blog/deletecomment/([0-9]+)', DeleteComment),
+                              ('/signup', SignUpPage),
+                              ('/login', LoginPage),
+                              ('/logout', LogoutPage)
+                               ], debug=True)

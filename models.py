@@ -39,7 +39,7 @@ class User(ndb.Model):
         return u
 
     @classmethod
-    def register(self,name,pw,email=None):
+    def register(self, name, pw, email=None):
         """
         Creates the new user in the User object.
         """
@@ -65,6 +65,7 @@ class User(ndb.Model):
 def blog_key(name='default'):
     return ndb.Key('blogs', name)
 
+
 class Post(ndb.Model):
     """
     Attributes for the Post datastore
@@ -84,9 +85,8 @@ class Post(ndb.Model):
         comments = Comment.query().filter(Comment.post == self.key)
         return comments
 
+
 # Blog - Comment Model
-
-
 class Comment(ndb.Model):
     """
     Here are attributes for comments datastore
@@ -96,10 +96,9 @@ class Comment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     author = ndb.KeyProperty(kind='User')
 
+
 # Blog - Like Model
-
 class Like(ndb.Model):
-
     """
     An model to contain all likes for posts.
     """
