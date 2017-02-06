@@ -33,14 +33,12 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
 
 
-
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
 
 # Creating a security around using the secret variable
-
-secret='test_security'
+secret = 'test_security'
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -83,7 +81,6 @@ class BaseHandler(webapp2.RequestHandler):
         print "Base Handler- Login Method"
         self.set_secure_cookie('user_id', str(user.key.id()))
 
-
     def logout(self):
         """
         Removes login information
@@ -100,7 +97,6 @@ class BaseHandler(webapp2.RequestHandler):
         self.user = uid and User.by_id(int(uid))
 
 
-
 def render_post(response, post):
     response.out.write('<b>' + post.subject + '<b><br>')
     response.out.write('post.content')
@@ -111,7 +107,7 @@ def render_post(response, post):
 class MainPage(BaseHandler):
     def get(self):
         posts = Post.query().order(Post.created)
-        self.render('front.html', posts= posts)
+        self.render('front.html', posts=posts)
 
 
 # Post Function
@@ -120,16 +116,14 @@ class PostPage(BaseHandler):
         """
         Renders Posts to home page
         """
-        key = ndb.Key('Post', int(post_id), parent= models.blog_key())
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
         like_obj = Like.query(Like.post == post.key)
-
-
 
         if not post:
             self.error(404)
             return
-        self.render("permalink.html", post = post)
+        self.render("permalink.html", post=post)
 
     def post(self, post_id):
         """
@@ -141,7 +135,8 @@ class PostPage(BaseHandler):
         if not post:
             self.error(404)
             return
-        self.render("post.html", posts = posts)
+        self.render("post.html", posts=posts)
+
 
 class NewPostPage(BaseHandler):
     def get(self):
@@ -168,7 +163,8 @@ class NewPostPage(BaseHandler):
                         content=content,
                         error=error)
 
-#Edit Post
+
+# Edit Post
 class EditPost(BaseHandler):
     def get(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
@@ -200,22 +196,25 @@ class EditPost(BaseHandler):
             self.redirect('/')
         else:
             error = "Please enter Subject and Content"
-            self.render("editpost.html", subject= subject, content = content, error = error)
+            self.render("editpost.html",
+                        subject=subject,
+                        content=content,
+                        error=error)
 
 
 # Delete Post
 class DeletePost(BaseHandler):
-    def get(self,post_id):
+    def get(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
         if not post:
             self.error(404)
             return
         if self.user:
-            self.render('deletepost.html', post = post)
+            self.render('deletepost.html', post=post)
         else:
             error = "In order to delete post, please login into the site"
-            self.render('login.html', error = error)
+            self.render('login.html', error=error)
 
     def post(self, post_id):
         if not self.user:
@@ -227,6 +226,7 @@ class DeletePost(BaseHandler):
             post.key.delete()
             time.sleep(0.1)
         self.redirect('/')
+
 
 # Commenting
 class CreateComment(BaseHandler):
@@ -251,26 +251,26 @@ class CreateComment(BaseHandler):
 
         content = self.request.get('comment')
         if content:
-            c = Comment(post = post.key, content = content, author = self.user.key)
+            c = Comment(post=post.key, content=content, author=self.user.key)
             c.put()
             time.sleep(0.1)
             self.redirect('/blog/%s' % str(post_id))
         else:
             error = "enter valid comment"
-            self.render("editcomment.html",content = content, error = error)
+            self.render("editcomment.html", content=content, error=error)
+
 
 class EditComment(BaseHandler):
     def get(self, comment_id):
-        print "Inside EditComment Method"
-
         key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
         if not comment:
             self.error(404)
             return
+
         if self.user:
-            self.render("editcomment.html", content = comment.content)
+            self.render("editcomment.html", content=comment.content)
         else:
             self.redirect("/login")
 
@@ -287,21 +287,23 @@ class EditComment(BaseHandler):
                 comment.content = content
                 comment.put()
                 time.sleep(0.1)
-                self.redirect("/blog/%s" %str(comment.post.id()))
+                self.redirect("/blog/%s" % str(comment.post.id()))
             else:
                 msg = "You are not the owner of this comment"
-                self.render("editcomment.html", content = comment.content, error = msg)
+                self.render("editcomment.html",
+                            content=comment.content,
+                            error=msg)
         else:
             msg = "Valid Comment please"
-            self.render("editcomment.html", content = comment.content, error = msg)
+            self.render("editcomment.html",
+                        content=comment.content,
+                        error=msg)
 
 
 # #Delete Comment
 class DeleteComment(BaseHandler):
     def get(self, comment_id):
-
         content = self.request.get('comment')
-
         key = ndb.Key('Comment', int(comment_id))
         comment = key.get()
 
@@ -310,7 +312,7 @@ class DeleteComment(BaseHandler):
             return
 
         if self.user:
-            self.render("deletecomment.html",author = self.user.key)
+            self.render("deletecomment.html",author=self.user.key)
         else:
             self.redirect("/login")
 
@@ -366,22 +368,7 @@ class LikePost(BaseHandler):
 
 
 
-        # if likes:
-        #     self.render("post.html", like = likes)
-        # else:
-        #     self.redirect('/')
-
-        # if self.user and post.author.id() == self.user.key.id():
-        #     self.write("You can not like your own post")
-        # else:
-        #     like = Like(post = post.key, author = self.user.key.id())
-        #     like.put()
-        #     post.put()
-        #     self.redirect('/')
-
-
-
-#Unlike Post
+# Unlike Post
 class UnlikePost(BaseHandler):
     def get(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
@@ -475,7 +462,8 @@ class SignUpPage(BaseHandler):
             self.login(u)
             self.redirect('/')
 
-#User stuff
+
+# User stuff
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
@@ -526,12 +514,13 @@ class LoginPage(BaseHandler):
             msg = "Login not valid"
             self.render('login.html', error=msg)
 
+
 # Logout
 class LogoutPage(BaseHandler):
+    """Logout Class"""
     def get(self):
         self.logout()
         self.redirect('/')
-
 
 app=webapp2.WSGIApplication([('/', MainPage),
                              ('/blog/([0-9]+)', PostPage),
