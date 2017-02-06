@@ -27,7 +27,7 @@ input {
 
 /*Navbar*/
 .navbar{
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   margin-top: 10px;
   border: none;
 }
@@ -36,6 +36,6 @@ input {
 }
 
 .navbar-inverse .navbar-nav>.active>a {
-  color:#FFFFFF;
+  color:#ffffff;
   background-color: #337ab7;
 }

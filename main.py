@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Dependecies for tha application
+# Dependecies for tha application
 
 import os
 import webapp2
@@ -29,8 +29,8 @@ from models import User, Post, Comment, Like
 from google.appengine.ext import ndb
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
-                               autoescape = True)
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
+                               autoescape=True)
 
 
 
@@ -38,9 +38,10 @@ def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
 
-#Creating a security around using the secret variable
+# Creating a security around using the secret variable
 
-secret = 'test_security'
+secret='test_security'
+
 
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -85,7 +86,7 @@ class BaseHandler(webapp2.RequestHandler):
 
     def logout(self):
         """
-        Removes login information from browser and cookie
+        Removes login information
         """
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
@@ -144,46 +145,50 @@ class PostPage(BaseHandler):
 
 class NewPostPage(BaseHandler):
     def get(self):
-         if self.user:
+        if self.user:
             self.render("newpost.html")
-         else:
-             self.redirect('/login')
+        else:
+            self.redirect('/login')
 
     def post(self):
         subject = self.request.get('subject')
         content = self.request.get('post_text')
 
         if subject and content:
-            p = Post(parent = models.blog_key(), subject = subject, content = content, author = self.user.key)
+            p = Post(parent=models.blog_key(),
+                     subject=subject, content=content,
+                     author=self.user.key)
             p.put()
             self.redirect('/')
             self.redirect('/blog/%s' % str(p.key.integer_id()))
         else:
             error = "Please enter Subject and Content"
-            self.render("newpost.html", subject= subject, content = content, error = error)
+            self.render("newpost.html",
+                        subject=subject,
+                        content=content,
+                        error=error)
 
 #Edit Post
 class EditPost(BaseHandler):
     def get(self, post_id):
-        print "Inside my get edit function"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
         if self.user:
             if post.author.id() != self.user.key.id():
-                self.redirect('/blog/%s' %str(post.key.id()))
+                self.redirect('/blog/%s' % str(post.key.id()))
             else:
-                self.render("editpost.html", subject = post.subject, content = post.content)
+                self.render("editpost.html",
+                            subject=post.subject,
+                            content=post.content)
         else:
             error = 'You must login to view the post'
-            self.render('login.html', error = error)
+            self.render('login.html', error=error)
 
     def post(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
-
         userid = self.read_secure_cookie('user_id')
-
         subject = self.request.get('subject')
         content = self.request.get('post_text')
 
@@ -198,7 +203,7 @@ class EditPost(BaseHandler):
             self.render("editpost.html", subject= subject, content = content, error = error)
 
 
-#Delete Post
+# Delete Post
 class DeletePost(BaseHandler):
     def get(self,post_id):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
@@ -474,11 +479,13 @@ class SignUpPage(BaseHandler):
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
+
 def make_pw_hash(name, pw, salt=None):
     if not salt:
         salt = make_salt()
     h = hashlib.sha256(name + pw + salt).hexdigest()
     return '%s,%s' %(salt, h)
+
 
 def valid_pw(name, pw, h):
     salt = h.split(',')[0]
@@ -517,25 +524,26 @@ class LoginPage(BaseHandler):
             self.redirect('/')
         else:
             msg = "Login not valid"
-            self.render('login.html', error = msg)
+            self.render('login.html', error=msg)
 
-#Logout
+# Logout
 class LogoutPage(BaseHandler):
     def get(self):
         self.logout()
         self.redirect('/')
 
-app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/blog/([0-9]+)', PostPage),
-                               ('/blog/newpost', NewPostPage),
-                               ('/blog/like/([0-9]+)', LikePost),
-                               ('/blog/unlike/([0-9]+)', UnlikePost),
-                               ('/blog/editpost/([0-9]+)', EditPost),
-                               ('/blog/deletepost/([0-9]+)', DeletePost),
-                               ('/blog/newcomment/([0-9]+)', CreateComment),
-                               ('/blog/editcomment/([0-9]+)', EditComment),
-                               ('/blog/deletecomment/([0-9]+)', DeleteComment),
-                               ('/signup', SignUpPage),
-                               ('/login', LoginPage),
-                               ('/logout', LogoutPage)
-                              ], debug=True)
+
+app=webapp2.WSGIApplication([('/', MainPage),
+                             ('/blog/([0-9]+)', PostPage),
+                             ('/blog/newpost', NewPostPage),
+                             ('/blog/like/([0-9]+)', LikePost),
+                             ('/blog/unlike/([0-9]+)', UnlikePost),
+                             ('/blog/editpost/([0-9]+)', EditPost),
+                             ('/blog/deletepost/([0-9]+)', DeletePost),
+                             ('/blog/newcomment/([0-9]+)', CreateComment),
+                             ('/blog/editcomment/([0-9]+)', EditComment),
+                             ('/blog/deletecomment/([0-9]+)', DeleteComment),
+                             ('/signup', SignUpPage),
+                             ('/login', LoginPage),
+                             ('/logout', LogoutPage)
+                             ], debug=True)
