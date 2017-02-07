@@ -40,6 +40,21 @@ def render_str(template, **params):
 # Creating a security around using the secret variable
 secret = 'test_security'
 
+def make_secure_val(val):
+    """
+    Creates the secure value using a secret.
+    """
+    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+
+
+def check_secure_val(secure_val):
+    """
+    Verification of the secure value against the secret
+    """
+    val = secure_val.split('|')[0]
+    if secure_val == make_secure_val(val):
+        return val
+
 
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -345,16 +360,16 @@ class LikePost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
-        userid = self.read_secure_cookie('user_id')
-
         if not post:
             self.error(404)
             return
 
         if not self.user:
-            self.redirect('/')
+            self.redirect('/login')
+            return
 
         like_obj = Like.query(Like.post == post.key).get()
+
 
         if post.author == self.user.key:
             self.write("You can not like your own post")
@@ -383,6 +398,10 @@ class UnlikePost(BaseHandler):
 
         if not post:
             self.error(404)
+            return
+
+        if not self.user:
+            self.redirect('/login')
             return
 
         like_obj = Like.query(Like.post == post.key).get()
@@ -485,21 +504,6 @@ def valid_pw(name, pw, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
 
-
-def make_secure_val(val):
-    """
-    Creates the secure value using a secret.
-    """
-    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
-
-
-def check_secure_val(secure_val):
-    """
-    Verification of the secure value against the secret
-    """
-    val = secure_val.split('|')[0]
-    if secure_val == make_secure_val(val):
-        return val
 
 
 # Login class
