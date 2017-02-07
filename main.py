@@ -146,6 +146,9 @@ class NewPostPage(BaseHandler):
             self.redirect('/login')
 
     def post(self):
+        if not self.user:
+            self.redirect('/login')
+
         subject = self.request.get('subject')
         content = self.request.get('post_text')
 
@@ -187,6 +190,9 @@ class EditPost(BaseHandler):
         userid = self.read_secure_cookie('user_id')
         subject = self.request.get('subject')
         content = self.request.get('post_text')
+
+        if not self.user:
+            self.redirect('/login')
 
         if subject and content:
             post.subject = subject
@@ -245,6 +251,9 @@ class CreateComment(BaseHandler):
         """
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
+
+        if not self.user:
+            self.redirect('/login')
 
         if not post:
             return self.redirect('/')
@@ -336,7 +345,6 @@ class LikePost(BaseHandler):
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
-        print post
         userid = self.read_secure_cookie('user_id')
 
         if not post:
@@ -390,7 +398,7 @@ class UnlikePost(BaseHandler):
                     else:
                         self.write("user doesn't exist")
         else:
-            self.write("No Like object")
+            self.write("No Like object created")
 
 # Validation for Username, and password
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
