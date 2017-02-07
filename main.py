@@ -40,6 +40,7 @@ def render_str(template, **params):
 # Creating a security around using the secret variable
 secret = 'test_security'
 
+
 def make_secure_val(val):
     """
     Creates the secure value using a secret.
@@ -356,7 +357,6 @@ class DeleteComment(BaseHandler):
 # Like
 class LikePost(BaseHandler):
     def get(self, post_id):
-        print "Inside LikePost- get"
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
@@ -369,7 +369,6 @@ class LikePost(BaseHandler):
             return
 
         like_obj = Like.query(Like.post == post.key).get()
-
 
         if post.author == self.user.key:
             self.write("You can not like your own post")
@@ -503,7 +502,6 @@ def make_pw_hash(name, pw, salt=None):
 def valid_pw(name, pw, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, pw, salt)
-
 
 
 # Login class
