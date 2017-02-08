@@ -265,11 +265,11 @@ class CreateComment(BaseHandler):
         """
         Creates the new comment on single page
         """
-        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
-        post = key.get()
-
         if not self.user:
             return self.redirect('/login')
+
+        key = ndb.Key('Post', int(post_id), parent=models.blog_key())
+        post = key.get()
 
         if not post:
             return self.redirect('/')
@@ -357,15 +357,15 @@ class DeleteComment(BaseHandler):
 # Like
 class LikePost(BaseHandler):
     def get(self, post_id):
+        if not self.user:
+            return self.redirect('/login')
+
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
 
         if not post:
             self.error(404)
             return
-
-        if not self.user:
-            return self.redirect('/login')
 
         like_obj = Like.query(Like.post == post.key).get()
 
