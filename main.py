@@ -163,7 +163,7 @@ class NewPostPage(BaseHandler):
 
     def post(self):
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
 
         subject = self.request.get('subject')
         content = self.request.get('post_text')
@@ -201,14 +201,14 @@ class EditPost(BaseHandler):
             self.render('login.html', error=error)
 
     def post(self, post_id):
+        if not self.user:
+            return self.redirect('/login')
+
         key = ndb.Key('Post', int(post_id), parent=models.blog_key())
         post = key.get()
         userid = self.read_secure_cookie('user_id')
         subject = self.request.get('subject')
         content = self.request.get('post_text')
-
-        if not self.user:
-            self.redirect('/login')
 
         if subject and content:
             post.subject = subject
@@ -269,7 +269,7 @@ class CreateComment(BaseHandler):
         post = key.get()
 
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
 
         if not post:
             return self.redirect('/')
@@ -365,8 +365,7 @@ class LikePost(BaseHandler):
             return
 
         if not self.user:
-            self.redirect('/login')
-            return
+            return self.redirect('/login')
 
         like_obj = Like.query(Like.post == post.key).get()
 
