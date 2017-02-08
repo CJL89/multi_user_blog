@@ -300,13 +300,13 @@ class EditComment(BaseHandler):
             self.redirect("/login")
 
     def post(self, comment_id):
-        key = ndb.Key('Comment', int(comment_id))
-        comment = key.get()
-
         if not self.user:
             return self.redirect("/login")
 
+        key = ndb.Key('Comment', int(comment_id))
+        comment = key.get()
         content = self.request.get('comment')
+
         if content:
             if comment.author.id() == self.user.key.id():
                 comment.content = content
@@ -376,7 +376,7 @@ class LikePost(BaseHandler):
                 authors = like_obj.author
                 for author in authors:
                     if(author == self.user.key):
-                        self.redirect("/blog/%s" % str(post.key.id))
+                        return self.redirect("/blog/%s" % str(post.key.id()))
                 like_obj.like_count += 1
                 authors.append(self.user.key)
                 like_obj.put()
@@ -410,10 +410,10 @@ class UnlikePost(BaseHandler):
                 if author == self.user.key:
                     like_obj.author.remove(author)
                     flag = True
-                    if not flag:
-                        self.redirect('/blog/%s' % str(post.key.id()))
-                    else:
-                        self.write("user doesn't exist")
+                if not flag:
+                    self.redirect('/blog/%s' % str(post.key.id()))
+                else:
+                    self.write("user doesn't exist")
         else:
             self.write("No Like object created")
 
